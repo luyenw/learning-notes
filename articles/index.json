@@ -1,0 +1,18 @@
+{
+  "articles": [
+    {
+      "title": "Welcome to My Learning Notes",
+      "filename": "welcome.md",
+      "date": "2024-09-27",
+      "excerpt": "Welcome to my personal collection of learning notes and discoveries. This blog serves as a repository for knowledge, insights, and lessons learned along my journey.",
+      "tags": ["welcome", "introduction", "blog"]
+    },
+    {
+      "title": "Getting Started with Static Site Generation",
+      "filename": "getting-started.md",
+      "date": "2024-09-26",
+      "excerpt": "Learn how to build and deploy static websites using GitHub Pages. This guide covers the basics of creating a simple, fast, and maintainable static site.",
+      "tags": ["web development", "github pages", "static sites", "tutorial"]
+    }
+  ]
+}

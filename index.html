@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Notes - My Personal Blog</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1 class="site-title">Learning Notes</h1>
+            <p class="site-description">My personal collection of knowledge and discoveries</p>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <div class="search-section">
+                <input type="text" id="searchInput" placeholder="Search articles..." class="search-input">
+            </div>
+
+            <section class="articles-section">
+                <h2 class="section-title">Recent Articles</h2>
+                <div id="articlesContainer" class="articles-grid">
+                    <div class="loading">Loading articles...</div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Learning Notes. Built with ❤️ and GitHub Pages.</p>
+        </div>
+    </footer>
+
+    <script src="js/marked.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

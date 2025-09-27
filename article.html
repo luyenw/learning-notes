@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="articleTitle">Article - Learning Notes</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+</head>
+<body>
+    <header class="header article-header">
+        <div class="container">
+            <nav class="breadcrumb">
+                <a href="index.html" class="back-link">← Back to Articles</a>
+            </nav>
+            <h1 id="articleTitleHeader" class="article-title">Loading...</h1>
+            <div id="articleMeta" class="article-meta"></div>
+        </div>
+    </header>
+
+    <main class="main article-main">
+        <div class="container">
+            <article id="articleContent" class="article-content">
+                <div class="loading">Loading article...</div>
+            </article>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <nav class="article-nav">
+                <a href="index.html" class="nav-link">← All Articles</a>
+            </nav>
+            <p>&copy; 2024 Learning Notes. Built with ❤️ and GitHub Pages.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="js/marked.min.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadArticle();
+        });
+    </script>
+</body>
+</html>
