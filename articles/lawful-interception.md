@@ -9,12 +9,12 @@ Tài liệu tóm tắt về LI (lawful interception) từ các tài liệu của
 ## Document Reference
 
 <div class="pdf-container">
-    <iframe src="pdf/Comprehensive Summary of Lawful Interception (ETSI Standards Overview).pdf"
+    <iframe src="pdf/li_summary.pdf"
             type="application/pdf"
             width="100%"
             height="800px"
             style="border: 1px solid #ddd; border-radius: 8px;">
-        <p>Your browser does not support embedded PDFs. <a href="pdf/Comprehensive Summary of Lawful Interception (ETSI Standards Overview).pdf" target="_blank">Download the PDF</a> to view the document.</p>
+        <p>Your browser does not support embedded PDFs. <a href="pdf/li_summary.pdf" target="_blank">Download the PDF</a> to view the document.</p>
     </iframe>
 </div>
 
