@@ -2622,3 +2622,1230 @@ for (int i = 0; i < 3; i++) {
 // }
 ```
 ---
+
+## 1.4. Arrays & Collections
+
+### 1.4.1. Arrays
+
+- Mảng có kích thước cố định, không thay đổi sau khi tạo, dùng `.length` (field, không phải method `.length()`)
+- Arrays utility class (java.util.Arrays)
+  - **sort(arr)** hoặc **sort(arr, Comparator)**: sắp xếp tăng dần (natural order), không trả về mảng mới, thay đổi trực tiếp.
+  - **binarySearch(arr, key)** hoặc **binarySearch(arr, key, Comparator)**: tìm index trong mảng đã sort, nếu không tìm thấy, trả về -(insertion_point)-1
+    - insertion_point: vị trí cần chèn key vào để mảng giữ thứ tự
+    - Công thức: `insertion_point = -result - 1`
+  - **equals(a, b)**: so sánh 2 mảng 1D theo từng phần tử. Trả về true nếu cùng length và tất cả các phần tử bằng nhau.
+
+  ```java
+  int[] a = {1, 2, 3};
+  int[] b = {1, 2, 3};
+  Arrays.equals(a, b);  // true
+  ```
+
+  - **deepEquals(a, b)**: dùng cho mảng nhiều chiều hoặc mảng các object, so sánh đệ quy thay vì so sánh địa chỉ.
+
+  ```java
+  int[][] m1 = {{1, 2}, {3, 4}};
+  int[][] m2 = {{1, 2}, {3, 4}};
+  Arrays.deepEquals(m1, m2);  // true
+  ```
+
+  - **mismatch(a, b)**: so sánh 2 mảng theo từng phần tử, trả về index đầu tiên khác nhau, nếu giống nhau hoàn toàn trả về -1.
+
+  ```java
+  int[] x = {1, 2, 3, 4};
+  int[] y = {1, 2, 9, 4};
+  Arrays.mismatch(x, y);  // 2
+  ```
+
+  - **compare(a, b)**: so sánh lexicographically (từ điển), trả về âm/0/dương
+
+**ragged array**
+- mảng có độ dài mỗi hàng khác nhau
+- Các array bên trong cần khởi tạo riêng nếu sử dụng.
+
+```java
+int[][] ragged = new int[3][];
+ragged[0] = new int[2];  // {0, 0}
+ragged[1] = new int[4];  // {0, 0, 0, 0}
+ragged[2] = new int[3];  // {0, 0, 0}
+```
+
+**System.arraycopy(src, srcPos, dest, destPos, length)**
+- Copy elements từ mảng nguồn sang mảng đích
+- Nếu length vượt quá src.length hoặc dest.length => throw ArrayIndexOutOfBoundsException (Runtime Exception)
+
+**Arrays.copyOf(arr, newLength)**
+- Tạo mảng mới với độ dài newLength
+- Nếu newLength > arr.length, thêm giá trị mặc định (0, null, false...)
+- Nếu newLength < arr.length, cắt bớt
+
+**⚠️ Các trường hợp hay gặp trong thi:**
+
+```java
+// ❌ Khai báo sai
+int[] a1 = new int[];        // Compile error: phải có size
+int[] a2 = new int[3]{1,2,3}; // Compile error: không được vừa size vừa initializer
+
+// ✅ Khai báo đúng
+int[] a3 = new int[3];
+int[] a4 = {1, 2, 3};
+int[] a5 = new int[]{1, 2, 3};
+
+// ⚠️ Array reference comparison
+int[] x = {1, 2, 3};
+int[] y = {1, 2, 3};
+x == y;              // false (khác reference)
+x.equals(y);         // false (equals() từ Object, so sánh reference)
+Arrays.equals(x, y); // true (so sánh nội dung)
+
+// ⚠️ binarySearch trên mảng CHƯA sort
+int[] arr = {3, 1, 4, 2};
+Arrays.binarySearch(arr, 2);  // Kết quả KHÔNG đảm bảo đúng!
+
+// ✅ Phải sort trước
+Arrays.sort(arr);  // [1, 2, 3, 4]
+Arrays.binarySearch(arr, 2);  // 1 (đúng)
+
+// ⚠️ ArrayIndexOutOfBoundsException
+int[] nums = new int[3];
+nums[3] = 10;  // Runtime error: index 3 out of bounds for length 3
+
+// ⚠️ NullPointerException với mảng
+int[] nullArr = null;
+nullArr.length;  // NullPointerException
+nullArr[0] = 5;  // NullPointerException
+
+// ⚠️ Ragged array - phần tử chưa khởi tạo
+int[][] ragged = new int[3][];
+ragged[0][0] = 1;  // NullPointerException (ragged[0] chưa được khởi tạo)
+```
+
+---
+
+### 1.4.2. Collections (java.util)
+
+- Các interface chính: List, Set, Queue, Deque, Map
+
+**List (ordered, cho phép duplicate)**
+- Các implement thường dùng: **ArrayList**, **LinkedList**, Vector, Stack
+- Các method thường dùng: add, get, set, remove, size(), indexOf, subList(from, to)
+- Stack (extends Vector): push, pop, peek
+- **List.of(...)**: trả về **immutable** list (không add, remove, set), không nhận giá trị null
+
+```java
+List<String> list = List.of("A", "B", "C");
+// list.add("D");  // ❌ UnsupportedOperationException
+```
+
+- **List.copyOf(collection)**: trả về immutable list, nếu tham số đã là immutable, trả về luôn tham số (không copy)
+- **Constructor nhận Collection**: shallow copy các phần tử hiện có (sao chép reference đến object)
+
+```java
+List<String> original = new ArrayList<>(List.of("A", "B"));
+List<String> copy = new ArrayList<>(original);  // shallow copy
+```
+
+**⚠️ Các trường hợp hay gặp trong thi:**
+
+```java
+// ❌ List.of() không nhận null
+List<String> list1 = List.of("A", null, "C");  // NullPointerException
+
+// ❌ List.of() là immutable
+List<String> list2 = List.of("A", "B");
+list2.add("C");      // UnsupportedOperationException
+list2.set(0, "X");   // UnsupportedOperationException
+list2.remove(0);     // UnsupportedOperationException
+
+// ⚠️ Arrays.asList() - fixed-size nhưng có thể set
+List<String> list3 = Arrays.asList("A", "B", "C");
+list3.set(0, "X");   // ✅ OK
+list3.add("D");      // ❌ UnsupportedOperationException
+list3.remove(0);     // ❌ UnsupportedOperationException
+
+// ⚠️ ArrayList constructor vs List.of()
+List<String> list4 = new ArrayList<>(List.of("A", "B"));
+list4.add("C");      // ✅ OK (ArrayList là mutable)
+
+// ⚠️ subList() returns view, không phải copy
+List<Integer> original = new ArrayList<>(List.of(1, 2, 3, 4, 5));
+List<Integer> sub = original.subList(1, 3);  // [2, 3] - VIEW
+sub.set(0, 10);      // original = [1, 10, 3, 4, 5]
+original.add(6);     // ConcurrentModificationException khi dùng sub sau đó
+
+// ⚠️ remove() method overload
+List<Integer> nums = new ArrayList<>(List.of(1, 2, 3, 4));
+nums.remove(1);           // Remove tại index 1 → [1, 3, 4]
+nums.remove(Integer.valueOf(3));  // Remove object 3 → [1, 4]
+```
+
+---
+
+**Set (không duplicate)**
+- Các implement thường dùng: **HashSet**, **LinkedHashSet**, **TreeSet**
+- **HashSet**: không giữ thứ tự, cho phép null
+- **LinkedHashSet**: giữ các phần tử theo thứ tự chèn, cho phép null
+- **TreeSet**: giữ theo natural order hoặc Comparator, **không** cho phép phần tử null (do cần so sánh bằng compareTo/Comparator)
+- **Set.of(...)**: tương tự List.of(), trả về immutable set, không nhận null
+
+**NavigableSet (extends SortedSet)**
+- Interface cung cấp các method tìm kiếm gần một phần tử nào đó
+- **TreeSet implements NavigableSet**
+
+```java
+NavigableSet<Integer> set = new TreeSet<>(Set.of(1, 5, 10, 15));
+set.lower(10);     // 5 (< 10)
+set.floor(10);     // 10 (<= 10)
+set.ceiling(10);   // 10 (>= 10)
+set.higher(10);    // 15 (> 10)
+set.descendingSet();  // Reverse order view
+```
+
+**⚠️ Các trường hợp hay gặp trong thi:**
+
+```java
+// ❌ TreeSet không cho phép null
+TreeSet<String> tree = new TreeSet<>();
+tree.add(null);  // NullPointerException
+
+// ✅ HashSet cho phép null
+HashSet<String> hash = new HashSet<>();
+hash.add(null);  // OK
+
+// ⚠️ Set không có get() method
+Set<String> set = new HashSet<>(Set.of("A", "B", "C"));
+// set.get(0);  // Compile error: no such method
+
+// ⚠️ Set.of() không cho phép duplicate
+Set<String> set1 = Set.of("A", "B", "A");  // IllegalArgumentException
+
+// ✅ Add vào Set trả về boolean
+Set<String> set2 = new HashSet<>();
+set2.add("A");  // true (added)
+set2.add("A");  // false (already exists)
+
+// ⚠️ TreeSet yêu cầu comparable hoặc Comparator
+class Person { String name; }
+Set<Person> people = new TreeSet<>();
+people.add(new Person());  // ClassCastException (Person không implements Comparable)
+
+// ✅ Cần Comparator
+Set<Person> people2 = new TreeSet<>((p1, p2) -> p1.name.compareTo(p2.name));
+
+// ⚠️ NavigableSet methods trả về null nếu không tìm thấy
+NavigableSet<Integer> nums = new TreeSet<>(Set.of(5, 10, 15));
+nums.lower(5);    // null (không có phần tử < 5)
+nums.higher(15);  // null (không có phần tử > 15)
+```
+
+---
+
+**Queue (FIFO - First In First Out)**
+- Hàng đợi 1 đầu
+- Các method thường dùng:
+
+| Method | Throws Exception | Returns Special Value |
+|--------|------------------|----------------------|
+| Insert | add(e) | offer(e) |
+| Remove | remove() | poll() |
+| Examine | element() | peek() |
+
+```java
+Queue<String> queue = new LinkedList<>();
+queue.offer("A");  // true
+queue.peek();      // "A" (không remove)
+queue.poll();      // "A" (remove và return)
+```
+
+---
+
+**Deque (Double-Ended Queue)**
+- Hàng đợi 2 đầu (có thể thêm/xóa từ cả 2 đầu)
+- Các implement chính: **ArrayDeque**, **LinkedList**
+- Các method: 2 nhóm hành vi (throw exception / return special value) × 2 đầu (First/Last)
+
+```java
+Deque<String> deque = new ArrayDeque<>();
+deque.offerFirst("A");  // Thêm vào đầu
+deque.offerLast("B");   // Thêm vào cuối
+deque.pollFirst();      // "A"
+deque.pollLast();       // "B"
+```
+
+---
+
+**PriorityQueue**
+- Phần tử đầu hàng luôn là phần tử nhỏ nhất theo natural order hoặc Comparator
+- Có thể chứa phần tử trùng
+- **Không** cho phép null
+
+```java
+PriorityQueue<Integer> pq = new PriorityQueue<>();
+pq.offer(5);
+pq.offer(2);
+pq.offer(8);
+pq.poll();  // 2 (phần tử nhỏ nhất)
+```
+
+**⚠️ Các trường hợp hay gặp trong thi:**
+
+```java
+// ⚠️ Queue methods - exception vs return special value
+Queue<String> q = new LinkedList<>();
+
+// Empty queue
+q.remove();   // NoSuchElementException
+q.poll();     // null
+
+q.element();  // NoSuchElementException
+q.peek();     // null
+
+// ⚠️ PriorityQueue không cho phép null
+PriorityQueue<Integer> pq = new PriorityQueue<>();
+pq.offer(null);  // NullPointerException
+
+// ⚠️ PriorityQueue KHÔNG đảm bảo thứ tự khi iterate
+PriorityQueue<Integer> pq2 = new PriorityQueue<>();
+pq2.offer(5);
+pq2.offer(2);
+pq2.offer(8);
+// Iterator có thể cho: 2, 5, 8 HOẶC 2, 8, 5 (không đảm bảo)
+// CHỈ đầu hàng (peek/poll) luôn đúng
+
+// ⚠️ Deque như Stack
+Deque<String> stack = new ArrayDeque<>();
+stack.push("A");   // Thêm vào đầu
+stack.push("B");
+stack.pop();       // "B" (LIFO)
+stack.peek();      // "A"
+```
+
+---
+
+## 1.5. Collections Utility Class
+
+Các method thường dùng trong **java.util.Collections**:
+
+```java
+List<Integer> list = new ArrayList<>(List.of(3, 1, 4, 1, 5));
+
+// ✅ sort() - sắp xếp
+Collections.sort(list);  // [1, 1, 3, 4, 5]
+
+// ✅ binarySearch() - tìm kiếm (list phải đã sort)
+int index = Collections.binarySearch(list, 3);  // 2
+
+// ✅ reverse() - đảo ngược
+Collections.reverse(list);  // [5, 4, 3, 1, 1]
+
+// ✅ shuffle() - xáo trộn
+Collections.shuffle(list);
+
+// ✅ max(), min()
+Collections.max(list);  // 5
+Collections.min(list);  // 1
+
+// ✅ frequency() - đếm số lần xuất hiện
+Collections.frequency(list, 1);  // 2
+
+// ✅ copy(dest, src) - copy list
+List<Integer> dest = new ArrayList<>(Arrays.asList(0, 0, 0, 0, 0));
+Collections.copy(dest, List.of(1, 2, 3));  // dest = [1, 2, 3, 0, 0]
+```
+
+**⚠️ Các trường hợp hay gặp trong thi:**
+
+```java
+// ⚠️ Collections.copy() yêu cầu dest.size() >= src.size()
+List<Integer> small = new ArrayList<>();
+Collections.copy(small, List.of(1, 2, 3));  // IndexOutOfBoundsException
+
+// ✅ Phải có đủ size
+List<Integer> big = new ArrayList<>(Arrays.asList(0, 0, 0));
+Collections.copy(big, List.of(1, 2, 3));  // OK
+
+// ⚠️ Collections.sort() chỉ dùng với List (không phải Set)
+Set<Integer> set = new HashSet<>(Set.of(3, 1, 2));
+// Collections.sort(set);  // Compile error: requires List
+
+// ⚠️ binarySearch yêu cầu list đã sort
+List<Integer> list = new ArrayList<>(List.of(3, 1, 4, 2));
+Collections.binarySearch(list, 2);  // Kết quả KHÔNG đúng
+
+Collections.sort(list);  // Phải sort trước
+Collections.binarySearch(list, 2);  // OK
+```
+
+---
+
+### 1.5.1. Map
+
+- **Map không extends Collection interface**
+- Các implement hay gặp: **HashMap**, **TreeMap**, **LinkedHashMap**
+- **HashMap**: không giữ thứ tự, cho phép null key (1 lần) và null values
+- **TreeMap**: giữ theo natural order hoặc Comparator, **không** cho phép null key
+- **LinkedHashMap**: giữ thứ tự chèn
+
+**Các method cơ bản:**
+
+```java
+Map<String, Integer> map = new HashMap<>();
+map.put("A", 1);           // Thêm/cập nhật
+map.get("A");              // 1
+map.containsKey("A");      // true
+map.containsValue(1);      // true
+map.remove("A");           // Xóa và return value
+map.keySet();              // Set<String>
+map.values();              // Collection<Integer>
+map.entrySet();            // Set<Map.Entry<String, Integer>>
+```
+
+**Map factory methods (Java 9+):**
+
+```java
+// ✅ Map.of() - immutable map, không nhận null
+Map<String, Integer> map = Map.of("A", 1, "B", 2, "C", 3);
+
+// ✅ Map.ofEntries() - dùng khi > 10 entries
+Map<String, Integer> map2 = Map.ofEntries(
+    Map.entry("A", 1),
+    Map.entry("B", 2)
+);
+```
+
+**NavigableMap (TreeMap implements NavigableMap):**
+
+```java
+NavigableMap<Integer, String> map = new TreeMap<>();
+map.put(1, "One");
+map.put(5, "Five");
+map.put(10, "Ten");
+
+map.lowerKey(5);     // 1 (< 5)
+map.floorKey(5);     // 5 (<= 5)
+map.ceilingKey(5);   // 5 (>= 5)
+map.higherKey(5);    // 10 (> 5)
+map.descendingMap(); // Reverse order view
+```
+
+**Advanced methods (Java 8+):**
+
+```java
+Map<String, Integer> map = new HashMap<>();
+
+// ✅ getOrDefault
+map.getOrDefault("X", 0);  // 0 (key không tồn tại)
+
+// ✅ putIfAbsent - chỉ put nếu key chưa tồn tại
+map.putIfAbsent("A", 1);   // put
+map.putIfAbsent("A", 2);   // không put (key đã tồn tại)
+
+// ✅ replace
+map.replace("A", 10);      // Thay giá trị nếu key tồn tại
+map.replace("A", 1, 20);   // Thay nếu key=A và oldValue=1
+
+// ✅ replaceAll(BiFunction)
+map.replaceAll((k, v) -> v * 2);  // Nhân đôi tất cả values
+
+// ✅ computeIfAbsent - tính value nếu key chưa tồn tại
+map.computeIfAbsent("B", k -> k.length());  // put("B", 1)
+
+// ✅ computeIfPresent - tính lại value nếu key tồn tại
+map.computeIfPresent("A", (k, v) -> v + 1);  // Tăng value lên 1
+
+// ✅ merge - merge value
+map.merge("A", 5, (oldVal, newVal) -> oldVal + newVal);
+// Nếu key tồn tại: value = oldVal + newVal
+// Nếu key chưa tồn tại: value = newVal
+```
+
+**⚠️ Các trường hợp hay gặp trong thi:**
+
+```java
+// ❌ Map.of() không nhận null key hoặc null value
+Map<String, Integer> map1 = Map.of("A", null);      // NullPointerException
+Map<String, Integer> map2 = Map.of(null, 1);        // NullPointerException
+
+// ❌ Map.of() không cho phép duplicate keys
+Map<String, Integer> map3 = Map.of("A", 1, "A", 2); // IllegalArgumentException
+
+// ❌ Map.of() là immutable
+Map<String, Integer> map4 = Map.of("A", 1);
+map4.put("B", 2);  // UnsupportedOperationException
+
+// ✅ HashMap cho phép 1 null key và nhiều null values
+Map<String, Integer> hash = new HashMap<>();
+hash.put(null, 1);      // OK
+hash.put("A", null);    // OK
+hash.put("B", null);    // OK
+
+// ❌ TreeMap không cho phép null key
+Map<String, Integer> tree = new TreeMap<>();
+tree.put(null, 1);  // NullPointerException
+tree.put("A", null); // ✅ OK (null value được phép)
+
+// ⚠️ put() trả về old value (hoặc null)
+Map<String, Integer> map = new HashMap<>();
+map.put("A", 1);  // null (key chưa tồn tại)
+map.put("A", 2);  // 1 (trả về old value)
+
+// ⚠️ remove() trả về value (hoặc null)
+map.remove("A");  // 2 (trả về value)
+map.remove("X");  // null (key không tồn tại)
+
+// ⚠️ keySet(), values(), entrySet() là VIEW
+Map<String, Integer> m = new HashMap<>(Map.of("A", 1, "B", 2));
+Set<String> keys = m.keySet();
+keys.remove("A");  // m cũng bị xóa key "A"
+
+// ⚠️ Iterate Map
+Map<String, Integer> map = new HashMap<>(Map.of("A", 1, "B", 2));
+
+// ❌ Map không phải Iterable
+// for (var entry : map) { }  // Compile error
+
+// ✅ Dùng entrySet()
+for (Map.Entry<String, Integer> entry : map.entrySet()) {
+    entry.getKey();
+    entry.getValue();
+}
+
+// ⚠️ merge() với null result
+map.merge("A", 10, (old, newVal) -> null);  // Remove key "A"
+
+// ⚠️ computeIfPresent() với null result
+map.computeIfPresent("B", (k, v) -> null);  // Remove key "B"
+
+// ⚠️ NavigableMap methods trả về null nếu không tìm thấy
+NavigableMap<Integer, String> nav = new TreeMap<>();
+nav.put(5, "Five");
+nav.lowerKey(5);   // null (không có key < 5)
+nav.higherKey(5);  // null (không có key > 5)
+```
+
+---
+## 1.6. Exception Handling
+
+**Sơ đồ kế thừa Exception:**
+
+```
+java.lang.Object
+    └── java.lang.Throwable
+            ├── java.lang.Exception (Checked)
+            │       ├── IOException
+            │       ├── SQLException
+            │       ├── FileNotFoundException
+            │       ├── ClassNotFoundException
+            │       └── java.lang.RuntimeException (Unchecked)
+            │               ├── NullPointerException
+            │               ├── ArrayIndexOutOfBoundsException
+            │               ├── IllegalArgumentException
+            │               ├── NumberFormatException
+            │               ├── ClassCastException
+            │               ├── ArithmeticException
+            │               └── UnsupportedOperationException
+            └── java.lang.Error (Unchecked)
+                    ├── OutOfMemoryError
+                    ├── StackOverflowError
+                    └── ExceptionInInitializerError
+```
+
+---
+
+### 1.6.1. Exception Types
+
+**Checked Exception:**
+- Extends Exception (KHÔNG phải RuntimeException)
+- **Bắt buộc** xử lý bằng try-catch hoặc khai báo throws
+- Compiler kiểm tra tại compile time
+- Thường là lỗi có thể recover (file không tồn tại, network timeout...)
+
+```java
+// ❌ Compile error: unhandled exception
+public void readFile() {
+    FileReader fr = new FileReader("file.txt");  // IOException
+}
+
+// ✅ Xử lý bằng try-catch
+public void readFile() {
+    try {
+        FileReader fr = new FileReader("file.txt");
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+
+// ✅ Hoặc khai báo throws
+public void readFile() throws IOException {
+    FileReader fr = new FileReader("file.txt");
+}
+```
+
+**Unchecked Exception (RuntimeException):**
+- Extends RuntimeException
+- **Không bắt buộc** xử lý (có thể catch nếu muốn)
+- Không cần khai báo throws
+- Thường là lỗi lập trình (null pointer, array out of bounds...)
+
+```java
+// ✅ Không cần try-catch hoặc throws
+public void divide(int a, int b) {
+    int result = a / b;  // Có thể throw ArithmeticException
+}
+
+// ✅ Có thể catch nếu cần
+public void divide(int a, int b) {
+    try {
+        int result = a / b;
+    } catch (ArithmeticException e) {
+        System.out.println("Cannot divide by zero");
+    }
+}
+```
+
+**Error:**
+- Extends Error
+- Lỗi nghiêm trọng của JVM/môi trường (OutOfMemoryError, StackOverflowError...)
+- **Unchecked** - không bắt buộc xử lý
+- Thường **KHÔNG nên** catch (không thể recover)
+
+```java
+// ⚠️ Không nên catch Error
+try {
+    // code
+} catch (OutOfMemoryError e) {  // Không khuyến khích
+    // Không thể làm gì nhiều
+}
+```
+
+---
+
+### 1.6.2. Try-Catch-Finally
+
+**Cú pháp:**
+- try phải đi cùng **catch** HOẶC **finally** (hoặc cả hai)
+- catch phải đứng **sau** try (nếu có)
+- finally phải đứng **cuối cùng** (nếu có)
+- Exception **cụ thể** phải đứng trước, **tổng quát** đứng sau
+
+```java
+// ✅ try-catch
+try {
+    // code
+} catch (IOException e) {
+    // handle
+}
+
+// ✅ try-finally
+try {
+    // code
+} finally {
+    // cleanup
+}
+
+// ✅ try-catch-finally
+try {
+    // code
+} catch (IOException e) {
+    // handle
+} finally {
+    // cleanup
+}
+
+// ❌ try alone - Compile error
+try {
+    // code
+}
+
+// ❌ finally before catch - Compile error
+try {
+    // code
+} finally {
+    // cleanup
+} catch (IOException e) {  // Compile error
+    // handle
+}
+```
+
+**Thứ tự catch:**
+
+```java
+// ❌ Superclass trước subclass - Compile error
+try {
+    // code
+} catch (Exception e) {          // Tổng quát
+    // handle
+} catch (IOException e) {        // Compile error: unreachable
+    // handle
+}
+
+// ✅ Subclass trước superclass
+try {
+    // code
+} catch (FileNotFoundException e) {  // Cụ thể nhất
+    // handle
+} catch (IOException e) {            // Cụ thể hơn
+    // handle
+} catch (Exception e) {              // Tổng quát nhất
+    // handle
+}
+```
+
+---
+
+### 1.6.3. Multi-Catch
+
+**Đặc điểm:**
+- Biến exception trong multi-catch là **effectively final** (không thể gán lại)
+- Các exception trong multi-catch **KHÔNG được** có quan hệ kế thừa cha-con
+- Chỉ chấp nhận các exception không liên quan trực tiếp (sibling)
+
+```java
+// ✅ Multi-catch với sibling exceptions
+try {
+    // code
+} catch (IOException | SQLException e) {  // e là effectively final
+    System.out.println(e);
+    // e = new IOException();  // ❌ Compile error: cannot assign
+}
+
+// ✅ Single catch - có thể reassign
+try {
+    // code
+} catch (IOException e) {
+    e = new IOException();  // ✅ OK
+}
+
+// ❌ Multi-catch với quan hệ cha-con - Compile error
+try {
+    // code
+} catch (Exception | IOException e) {  // Compile error: redundant
+    // IOException là subclass của Exception
+}
+
+// ✅ Multi-catch với nhiều sibling
+try {
+    // code
+} catch (FileNotFoundException | SQLException | ArithmeticException e) {
+    // OK - không có quan hệ kế thừa
+}
+```
+
+---
+
+### 1.6.4. Finally Block
+
+**Đặc điểm:**
+- Finally block **luôn** được thực thi (trừ System.exit() hoặc JVM crash)
+- Chạy sau try/catch, trước khi return
+- Nếu finally có return → ghi đè return trong try/catch
+
+```java
+// ⚠️ Finally luôn chạy
+public static int test() {
+    try {
+        return 1;
+    } finally {
+        System.out.println("Finally");  // Chạy trước khi return
+    }
+}
+// Output: Finally
+// Return: 1
+
+// ⚠️ Finally với return - ghi đè return của try
+public static int test2() {
+    try {
+        return 1;
+    } finally {
+        return 2;  // Ghi đè return trong try
+    }
+}
+// Return: 2
+
+// ⚠️ Finally chạy ngay cả khi có exception
+try {
+    throw new IOException();
+} catch (IOException e) {
+    System.out.println("Catch");
+} finally {
+    System.out.println("Finally");  // Vẫn chạy
+}
+// Output: Catch → Finally
+
+// ⚠️ Finally KHÔNG chạy nếu System.exit()
+try {
+    System.exit(0);
+} finally {
+    System.out.println("Finally");  // KHÔNG chạy
+}
+```
+
+**Default Exception Handler:**
+- Nếu exception không được catch đến main() → JVM gọi default exception handler
+- Default handler: print stack trace và terminate chương trình
+
+---
+
+### 1.6.5. Try-With-Resources
+
+**Đặc điểm:**
+- Tự động đóng resource khi kết thúc try block
+- Resource phải implement **AutoCloseable** hoặc **Closeable**
+- Resources được đóng theo **thứ tự ngược** với khai báo
+- **Không bắt buộc** có catch hoặc finally (khác try-catch thông thường)
+- Biến resource là **implicitly final**
+
+```java
+// ✅ Try-with-resources cơ bản
+try (FileReader fr = new FileReader("file.txt")) {
+    // use fr
+}  // fr.close() tự động được gọi
+
+// ✅ Không cần catch hoặc finally
+try (FileReader fr = new FileReader("file.txt")) {
+    // code
+}  // ✅ OK
+
+// ✅ Multiple resources - đóng theo thứ tự ngược
+try (FileReader fr = new FileReader("in.txt");
+     FileWriter fw = new FileWriter("out.txt")) {
+    // use fr and fw
+}  // fw.close() trước, sau đó fr.close()
+
+// ✅ Với catch và finally
+try (FileReader fr = new FileReader("file.txt")) {
+    // code
+} catch (IOException e) {
+    // handle
+} finally {
+    // cleanup
+}
+```
+
+**Java 9+: Effectively Final Variables:**
+
+```java
+// ✅ Java 9+ - dùng biến effectively final
+FileReader fr = new FileReader("file.txt");  // effectively final
+try (fr) {  // Không cần khai báo lại
+    // use fr
+}
+
+// ✅ Multiple effectively final resources
+FileReader fr = new FileReader("in.txt");
+FileWriter fw = new FileWriter("out.txt");
+try (fr; fw) {
+    // use fr and fw
+}
+
+// ❌ Biến không effectively final
+FileReader fr = new FileReader("file.txt");
+fr = new FileReader("other.txt");  // Reassigned
+try (fr) {  // Compile error: not effectively final
+}
+```
+
+**Suppressed Exceptions:**
+
+Khi cả try block VÀ close() đều throw exception:
+- Exception từ **try block** được ưu tiên (primary exception)
+- Exception từ **close()** trở thành suppressed exception
+- Lấy suppressed exceptions: `e.getSuppressed()`
+
+```java
+class MyResource implements AutoCloseable {
+    public void doSomething() throws Exception {
+        throw new Exception("Exception in try");
+    }
+
+    @Override
+    public void close() throws Exception {
+        throw new Exception("Exception in close");
+    }
+}
+
+// Test
+try (MyResource r = new MyResource()) {
+    r.doSomething();  // throw "Exception in try"
+} catch (Exception e) {
+    System.out.println(e.getMessage());  // "Exception in try"
+
+    Throwable[] suppressed = e.getSuppressed();
+    System.out.println(suppressed[0].getMessage());  // "Exception in close"
+}
+```
+
+**AutoCloseable vs Closeable:**
+
+```java
+// AutoCloseable - throws Exception
+public interface AutoCloseable {
+    void close() throws Exception;
+}
+
+// Closeable - throws IOException (subinterface của AutoCloseable)
+public interface Closeable extends AutoCloseable {
+    void close() throws IOException;
+}
+
+// ✅ Custom AutoCloseable
+class MyResource implements AutoCloseable {
+    @Override
+    public void close() throws Exception {
+        System.out.println("Closing");
+    }
+}
+
+try (MyResource r = new MyResource()) {
+    // use r
+}  // close() tự động được gọi
+```
+
+---
+
+### 1.6.6. Method Throws Declaration
+
+**Quy tắc khai báo throws:**
+- Checked exceptions **phải** khai báo throws (hoặc catch)
+- Unchecked exceptions **không bắt buộc** khai báo
+- Subclass override method **KHÔNG được** throws checked exception rộng hơn superclass
+
+```java
+// ✅ Khai báo checked exception
+public void readFile() throws IOException {
+    FileReader fr = new FileReader("file.txt");
+}
+
+// ✅ Khai báo multiple exceptions
+public void process() throws IOException, SQLException {
+    // code
+}
+
+// ✅ Unchecked exception - không bắt buộc khai báo
+public void divide(int a, int b) {  // Không cần throws
+    int result = a / b;  // Có thể throw ArithmeticException
+}
+
+// ✅ Có thể khai báo unchecked exception (optional)
+public void divide(int a, int b) throws ArithmeticException {
+    int result = a / b;
+}
+```
+
+**Override Method Rules:**
+
+```java
+class Parent {
+    public void method1() throws IOException {
+    }
+
+    public void method2() {
+    }
+}
+
+class Child extends Parent {
+    // ✅ Không throws - OK (hẹp hơn)
+    @Override
+    public void method1() {
+    }
+
+    // ✅ Throws subclass - OK
+    @Override
+    public void method1() throws FileNotFoundException {  // Subclass của IOException
+    }
+
+    // ❌ Throws superclass - Compile error
+    @Override
+    public void method1() throws Exception {  // Compile error: rộng hơn IOException
+    }
+
+    // ❌ Throws checked exception mới - Compile error
+    @Override
+    public void method2() throws IOException {  // Compile error: parent không throws
+    }
+
+    // ✅ Throws unchecked exception - OK (luôn được phép)
+    @Override
+    public void method2() throws RuntimeException {  // OK
+    }
+}
+```
+
+---
+
+### 1.6.7. Custom Exceptions
+
+```java
+// ✅ Custom checked exception
+class MyCheckedException extends Exception {
+    public MyCheckedException(String message) {
+        super(message);
+    }
+}
+
+// ✅ Custom unchecked exception
+class MyUncheckedException extends RuntimeException {
+    public MyUncheckedException(String message) {
+        super(message);
+    }
+}
+
+// Usage
+public void process() throws MyCheckedException {
+    throw new MyCheckedException("Custom error");
+}
+```
+
+---
+
+### 1.6.8. Common Exceptions (Hay gặp trong thi)
+
+**Runtime Exceptions (Unchecked):**
+
+```java
+// NullPointerException
+String s = null;
+s.length();  // NPE
+
+// ArrayIndexOutOfBoundsException
+int[] arr = {1, 2, 3};
+arr[5] = 10;  // AIOOBE
+
+// ClassCastException
+Object obj = "String";
+Integer num = (Integer) obj;  // CCE
+
+// NumberFormatException (subclass của IllegalArgumentException)
+Integer.parseInt("abc");  // NFE
+
+// ArithmeticException
+int x = 10 / 0;  // AE
+
+// IllegalArgumentException
+Thread t = new Thread();
+t.setPriority(100);  // IAE (priority phải 1-10)
+
+// UnsupportedOperationException
+List<String> list = List.of("A", "B");
+list.add("C");  // UOE
+```
+
+**Checked Exceptions:**
+
+```java
+// IOException
+FileReader fr = new FileReader("file.txt");  // IOException
+
+// FileNotFoundException (subclass của IOException)
+FileInputStream fis = new FileInputStream("missing.txt");  // FNFE
+
+// SQLException
+Connection conn = DriverManager.getConnection(url);  // SQLException
+
+// ClassNotFoundException
+Class.forName("com.example.Missing");  // CNFE
+```
+
+**⚠️ Các trường hợp hay gặp trong thi:**
+
+```java
+// ⚠️ Unreachable catch block
+try {
+    System.out.println("OK");
+} catch (IOException e) {  // Compile error: unreachable (try không throw IOException)
+}
+
+// ✅ OK với unchecked exception
+try {
+    System.out.println("OK");
+} catch (RuntimeException e) {  // ✅ OK (unchecked)
+}
+
+// ⚠️ Multi-catch với duplicate
+try {
+    // code
+} catch (IOException | IOException e) {  // Compile error: duplicate
+
+// ⚠️ Exception variable scope
+try {
+    // code
+} catch (IOException e) {
+    // e visible here
+}
+// e NOT visible here
+
+// ⚠️ Finally thay đổi return value
+public static int test() {
+    try {
+        return 1;
+    } finally {
+        return 2;  // Ghi đè return 1
+    }
+}  // Returns 2
+
+// ⚠️ Throw null
+throw null;  // NullPointerException at runtime
+```
+
+---
+
+## 1.7. AutoCloseable vs Closeable
+
+**So sánh:**
+
+| Đặc điểm | AutoCloseable | Closeable |
+|----------|---------------|-----------|
+| Package | `java.lang` | `java.io` |
+| Mối quan hệ | Interface cha | Extends AutoCloseable |
+| Exception throws | `throws Exception` | `throws IOException` |
+| Idempotent | Không bắt buộc | **Bắt buộc** (gọi nhiều lần không ảnh hưởng) |
+| Từ Java version | Java 7+ | Java 5+ |
+
+**Interface Definition:**
+
+```java
+// AutoCloseable - cha
+package java.lang;
+public interface AutoCloseable {
+    void close() throws Exception;  // Throws Exception (rộng)
+}
+
+// Closeable - con (subinterface)
+package java.io;
+public interface Closeable extends AutoCloseable {
+    void close() throws IOException;  // Throws IOException (hẹp hơn)
+}
+```
+
+**Sự khác biệt chính:**
+
+1. **Exception thrown:**
+   - `AutoCloseable.close()` throws `Exception` (checked exception rộng nhất)
+   - `Closeable.close()` throws `IOException` (cụ thể hơn)
+
+2. **Idempotency (tính bất biến):**
+   - `Closeable` **bắt buộc** idempotent: gọi `close()` nhiều lần phải an toàn
+   - `AutoCloseable` không bắt buộc idempotent: gọi lần 2 có thể throw exception
+
+3. **Use case:**
+   - `AutoCloseable`: Dùng cho tất cả resources (database connections, locks...)
+   - `Closeable`: Dùng cho I/O resources (streams, readers, writers...)
+
+**Ví dụ:**
+
+```java
+// ✅ AutoCloseable - có thể throw Exception
+class DatabaseConnection implements AutoCloseable {
+    @Override
+    public void close() throws Exception {  // OK: throws Exception
+        System.out.println("Closing DB connection");
+        throw new Exception("DB close error");
+    }
+}
+
+// ✅ Closeable - chỉ throw IOException, phải idempotent
+class FileResource implements Closeable {
+    private boolean closed = false;
+
+    @Override
+    public void close() throws IOException {  // Phải IOException (hoặc hẹp hơn)
+        if (!closed) {  // Idempotent: check trước khi đóng
+            System.out.println("Closing file");
+            closed = true;
+        }
+        // Gọi lần 2, 3... không làm gì và không throw exception
+    }
+}
+
+// ❌ Closeable không thể throw Exception rộng hơn
+class WrongCloseable implements Closeable {
+    @Override
+    public void close() throws Exception {  // Compile error: incompatible exception
+        // Cannot throw Exception, chỉ được IOException
+    }
+}
+```
+
+**Try-with-resources:**
+
+```java
+// ✅ Cả 2 đều dùng được với try-with-resources
+try (DatabaseConnection db = new DatabaseConnection()) {
+    // use db
+} catch (Exception e) {  // Phải catch Exception (vì AutoCloseable throws Exception)
+    e.printStackTrace();
+}
+
+try (FileResource file = new FileResource()) {
+    // use file
+} catch (IOException e) {  // Chỉ cần catch IOException
+    e.printStackTrace();
+}
+```
+
+**⚠️ Các trường hợp hay gặp trong thi:**
+
+```java
+// ⚠️ Closeable.close() idempotent
+class MyCloseable implements Closeable {
+    private boolean closed = false;
+
+    @Override
+    public void close() throws IOException {
+        if (closed) {
+            return;  // Đã đóng rồi, không làm gì
+        }
+        // Thực hiện đóng resource
+        closed = true;
+    }
+}
+
+MyCloseable resource = new MyCloseable();
+resource.close();  // OK
+resource.close();  // OK - không throw exception (idempotent)
+
+// ⚠️ AutoCloseable.close() không bắt buộc idempotent
+class MyAutoCloseable implements AutoCloseable {
+    @Override
+    public void close() throws Exception {
+        System.out.println("Closing");
+        throw new Exception("Already closed");  // Có thể throw mỗi lần gọi
+    }
+}
+
+MyAutoCloseable auto = new MyAutoCloseable();
+auto.close();  // Throws exception
+auto.close();  // Throws exception lần nữa (không idempotent)
+
+// ✅ Khi implement Closeable, override close() phải hẹp hơn hoặc bằng IOException
+class GoodCloseable implements Closeable {
+    @Override
+    public void close() throws IOException { }  // ✅ OK
+
+    @Override
+    public void close() throws FileNotFoundException { }  // ✅ OK (hẹp hơn)
+
+    @Override
+    public void close() { }  // ✅ OK (không throws)
+
+    @Override
+    public void close() throws Exception { }  // ❌ Compile error (rộng hơn)
+}
+
+// ✅ Standard Java I/O classes implement Closeable
+FileInputStream fis = new FileInputStream("file.txt");  // Closeable
+BufferedReader br = new BufferedReader(new FileReader("file.txt"));  // Closeable
+
+// ✅ JDBC classes implement AutoCloseable (không phải Closeable)
+Connection conn = DriverManager.getConnection(url);  // AutoCloseable
+Statement stmt = conn.createStatement();  // AutoCloseable
+ResultSet rs = stmt.executeQuery(sql);  // AutoCloseable
+```
+
+**Tóm tắt:**
+- **Closeable** = AutoCloseable + idempotent + chỉ throws IOException
+- Dùng **Closeable** cho I/O operations
+- Dùng **AutoCloseable** cho các resources khác (DB, locks, custom resources...)
+- Cả 2 đều dùng được với try-with-resources
+
+---
