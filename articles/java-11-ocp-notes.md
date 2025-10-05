@@ -2642,8 +2642,8 @@ for (int i = 0; i < 3; i++) {
   - **deepEquals(a, b)**: dùng cho mảng nhiều chiều hoặc mảng các object, so sánh đệ quy thay vì so sánh địa chỉ.
 
   ```java
-  int[][] m1 = {{1, 2}, {3, 4}};
-  int[][] m2 = {{1, 2}, {3, 4}};
+  int[][] m1 = {% raw %}{{1, 2}, {3, 4}}{% endraw %};
+  int[][] m2 = {% raw %}{{1, 2}, {3, 4}}{% endraw %};
   Arrays.deepEquals(m1, m2);  // true
   ```
 
