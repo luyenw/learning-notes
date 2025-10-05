@@ -1,8 +1,6 @@
-# 1. Java 11 OCP - Notes
+## 1. Java Data Types
 
-## 1.1. Java Data Types
-
-### 1.1.1. Primitive Types
+### 1.1. Primitive Types
 
 Các kiểu primitive trong Java (kích thước theo byte):
 
@@ -67,7 +65,7 @@ float wrong = 3.14;  // Compile error: incompatible types (double -> float)
 
 ---
 
-### 1.1.2. Widening & Narrowing Casting
+### 1.2. Widening & Narrowing Casting
 
 **Widening Casting (Implicit - Tự động):**
 Khi gán biến có kiểu nhỏ hơn cho biến kiểu lớn hơn, không cần ép kiểu tường minh.
@@ -123,7 +121,7 @@ char ch = (char) num;  // = 'A'
 
 ---
 
-### 1.1.3. Wrapper Classes
+### 1.3. Wrapper Classes
 
 Mỗi kiểu primitive đều có wrapper class tương ứng:
 
@@ -231,7 +229,7 @@ int x = nullValue;  // Runtime error: NullPointerException!
 
 ---
 
-### 1.1.4. String (Immutable, Pooling)
+### 1.4. String (Immutable, Pooling)
 
 String là **immutable** - không thể thay đổi nội dung sau khi tạo.
 
@@ -328,7 +326,7 @@ str.isBlank();           // false (Java 11+)
 
 ---
 
-### 1.1.5. StringBuilder & StringBuffer (Mutable)
+### 1.5. StringBuilder & StringBuffer (Mutable)
 
 Cho phép thay đổi nội dung chuỗi mà không tạo object mới.
 
@@ -426,7 +424,7 @@ StringBuffer sbuf = new StringBuffer();
 
 ---
 
-### 1.1.6. var Keyword (Java 10+)
+### 1.6. var Keyword (Java 10+)
 
 `var` cho phép compiler tự suy luận kiểu dữ liệu (Local Variable Type Inference).
 
@@ -511,7 +509,7 @@ var name = getName();    // Rõ là String từ tên method
 
 ---
 
-### 1.1.7. Độ ưu tiên toán tử (Operator Precedence)
+### 1.7. Độ ưu tiên toán tử (Operator Precedence)
 
 Thứ tự ưu tiên từ cao đến thấp:
 
@@ -590,7 +588,7 @@ boolean result2 = true || (1/0 > 0);  // true, không evaluate (1/0)
 boolean result3 = false & (1/0 > 0);  // ArithmeticException!
 boolean result4 = true | (1/0 > 0);   // ArithmeticException!
 ```
-### 1.1.8. Casting Reference Types
+### 1.8. Casting Reference Types
 
 **Upcasting (Implicit - Tự động):**
 - Chuyển từ subclass → superclass
@@ -633,9 +631,9 @@ if (animal2 instanceof Dog) {
 
 ---
 
-## 1.2. OOP Approach
+## 2. OOP Approach
 
-### 1.2.1. Access Modifiers
+### 2.1. Access Modifiers
 
 **Tóm tắt:**
 - `private`: Chỉ trong class
@@ -752,7 +750,7 @@ public class Child extends Parent {
 
 ---
 
-### 1.2.2. Inheritance (Kế thừa)
+### 2.2. Inheritance (Kế thừa)
 
 **Tóm tắt:**
 - Subclass kế thừa **tất cả** members từ superclass (kể cả `private`, nhưng không truy cập được)
@@ -917,7 +915,7 @@ Child c = new Child();
 
 ---
 
-### 1.2.3. Polymorphism (Đa hình)
+### 2.3. Polymorphism (Đa hình)
 
 **Tóm tắt:**
 - **Compile-time type** (bên trái): Quyết định methods/fields nào có thể GỌI
@@ -1123,7 +1121,7 @@ Dog puppy = dog.reproduce();  // Không cần cast!
 
 ---
 
-### 1.2.4. Abstraction (Abstract Class & Interface)
+### 2.4. Abstraction (Abstract Class & Interface)
 
 **Abstract Class - Tóm tắt:**
 - Dùng từ khóa `abstract`
@@ -1417,7 +1415,7 @@ tesla.stop();             // "Tesla stopped" (inherited)
 
 ---
 
-### 1.2.5. Overriding Rules (Quy tắc Ghi đè)
+### 2.5. Overriding Rules (Quy tắc Ghi đè)
 
 **Tóm tắt:**
 - Cùng **signature** (tên method + thứ tự/kiểu tham số)
@@ -1452,7 +1450,7 @@ class Child extends Parent {
 ```
 ---
 
-### 1.2.6. Inner & Nested Classes
+### 2.6. Inner & Nested Classes
 
 **Tóm tắt:**
 - **Member Inner Class**: Non-static class bên trong class khác, cần outer instance
@@ -1693,7 +1691,7 @@ demo.demonstrate();
 
 ---
 
-### 1.2.7. Enum
+### 2.7. Enum
 
 **Tóm tắt:**
 - Enum là special class, extends `java.lang.Enum` → không thể extends class khác
@@ -1945,7 +1943,7 @@ map.put(Status.ACTIVE, "Running");
 
 ---
 
-### 1.2.8. final & abstract Keywords
+### 2.8. final & abstract Keywords
 
 **Tóm tắt:**
 - `final` class: Không thể bị extends
@@ -2246,9 +2244,9 @@ processor.process();
 
 ---
 
-## 1.3. Control Flow
+## 3. Control Flow
 
-### 1.3.1. for Loop
+### 3.1. for Loop
 
 **Tóm tắt:**
 - **Standard for loop**: `for(init; condition; update) { }`
@@ -2345,7 +2343,7 @@ numbers.removeIf(num -> num == 3);
 
 ---
 
-### 1.3.2. switch Statement
+### 3.2. switch Statement
 
 **Tóm tắt:**
 - Kiểu hợp lệ: `byte`, `short`, `char`, `int`, `String`, `enum`, và wrapper types
@@ -2514,7 +2512,7 @@ if (text != null) {
 
 ---
 
-### 1.3.3. Labels, break, và continue
+### 3.3. Labels, break, và continue
 
 **Tóm tắt:**
 - **Label**: Tên đặt cho statement hoặc block
@@ -2623,9 +2621,9 @@ for (int i = 0; i < 3; i++) {
 ```
 ---
 
-## 1.4. Arrays & Collections
+## 4. Arrays & Collections
 
-### 1.4.1. Arrays
+### 4.1. Arrays
 
 - Mảng có kích thước cố định, không thay đổi sau khi tạo, dùng `.length` (field, không phải method `.length()`)
 - Arrays utility class (java.util.Arrays)
@@ -2722,7 +2720,7 @@ ragged[0][0] = 1;  // NullPointerException (ragged[0] chưa được khởi tạ
 
 ---
 
-### 1.4.2. Collections (java.util)
+### 4.2. Collections (java.util)
 
 - Các interface chính: List, Set, Queue, Deque, Map
 
@@ -2922,7 +2920,7 @@ stack.peek();      // "A"
 
 ---
 
-## 1.5. Collections Utility Class
+## 5. Collections Utility Class
 
 Các method thường dùng trong **java.util.Collections**:
 
@@ -2978,7 +2976,7 @@ Collections.binarySearch(list, 2);  // OK
 
 ---
 
-### 1.5.1. Map
+### 5.1. Map
 
 - **Map không extends Collection interface**
 - Các implement hay gặp: **HashMap**, **TreeMap**, **LinkedHashMap**
@@ -3124,7 +3122,7 @@ nav.higherKey(5);  // null (không có key > 5)
 ```
 
 ---
-## 1.6. Exception Handling
+## 6. Exception Handling
 
 **Sơ đồ kế thừa Exception:**
 
@@ -3152,7 +3150,7 @@ java.lang.Object
 
 ---
 
-### 1.6.1. Exception Types
+### 6.1. Exception Types
 
 **Checked Exception:**
 - Extends Exception (KHÔNG phải RuntimeException)
@@ -3220,7 +3218,7 @@ try {
 
 ---
 
-### 1.6.2. Try-Catch-Finally
+### 6.2. Try-Catch-Finally
 
 **Cú pháp:**
 - try phải đi cùng **catch** HOẶC **finally** (hoặc cả hai)
@@ -3293,7 +3291,7 @@ try {
 
 ---
 
-### 1.6.3. Multi-Catch
+### 6.3. Multi-Catch
 
 **Đặc điểm:**
 - Biến exception trong multi-catch là **effectively final** (không thể gán lại)
@@ -3333,7 +3331,7 @@ try {
 
 ---
 
-### 1.6.4. Finally Block
+### 6.4. Finally Block
 
 **Đặc điểm:**
 - Finally block **luôn** được thực thi (trừ System.exit() hoặc JVM crash)
@@ -3386,7 +3384,7 @@ try {
 
 ---
 
-### 1.6.5. Try-With-Resources
+### 6.5. Try-With-Resources
 
 **Đặc điểm:**
 - Tự động đóng resource khi kết thúc try block
@@ -3503,7 +3501,7 @@ try (MyResource r = new MyResource()) {
 
 ---
 
-### 1.6.6. Method Throws Declaration
+### 6.6. Method Throws Declaration
 
 **Quy tắc khai báo throws:**
 - Checked exceptions **phải** khai báo throws (hoặc catch)
@@ -3573,7 +3571,7 @@ class Child extends Parent {
 
 ---
 
-### 1.6.7. Custom Exceptions
+### 6.7. Custom Exceptions
 
 ```java
 // ✅ Custom checked exception
@@ -3598,7 +3596,7 @@ public void process() throws MyCheckedException {
 
 ---
 
-### 1.6.8. Common Exceptions (Hay gặp trong thi)
+### 6.8. Common Exceptions (Hay gặp trong thi)
 
 **Runtime Exceptions (Unchecked):**
 
@@ -3689,7 +3687,7 @@ throw null;  // NullPointerException at runtime
 
 ---
 
-## 1.7. AutoCloseable vs Closeable
+## 7. AutoCloseable vs Closeable
 
 **So sánh:**
 
