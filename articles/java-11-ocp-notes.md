@@ -3687,7 +3687,7 @@ throw null;  // NullPointerException at runtime
 
 ---
 
-## 7. AutoCloseable vs Closeable
+### 6.9. AutoCloseable vs Closeable
 
 **So sánh:**
 
@@ -3846,4 +3846,1693 @@ ResultSet rs = stmt.executeQuery(sql);  // AutoCloseable
 - Dùng **AutoCloseable** cho các resources khác (DB, locks, custom resources...)
 - Cả 2 đều dùng được với try-with-resources
 
+---
+
+## 7. Concurrency
+
+### 7.0. Thread Basics
+
+**Creating Threads:**
+
+Có 2 cách chính để tạo thread trong Java:
+
+**1. Extend Thread class:**
+
+```java
+// ✅ Extend Thread
+class MyThread extends Thread {
+    @Override
+    public void run() {
+        System.out.println("Thread running: " + Thread.currentThread().getName());
+    }
+}
+
+// Sử dụng
+MyThread thread = new MyThread();
+thread.start();  // Bắt đầu thread mới
+```
+
+**2. Implement Runnable interface:**
+
+```java
+// ✅ Implement Runnable (preferred)
+class MyRunnable implements Runnable {
+    @Override
+    public void run() {
+        System.out.println("Thread running: " + Thread.currentThread().getName());
+    }
+}
+
+// Sử dụng
+Thread thread = new Thread(new MyRunnable());
+thread.start();
+
+// ✅ Hoặc dùng lambda (Java 8+)
+Thread thread2 = new Thread(() -> {
+    System.out.println("Lambda thread");
+});
+thread2.start();
+```
+
+**⚠️ start() vs run():**
+
+```java
+Thread thread = new Thread(() -> System.out.println("Running"));
+
+// ✅ start() - tạo thread mới
+thread.start();  // Chạy trên thread mới
+
+// ❌ run() - chạy trên thread hiện tại
+thread.run();  // Chạy trên main thread (KHÔNG tạo thread mới!)
+```
+
+---
+
+**Thread States (Lifecycle):**
+
+Thread trong Java có 6 states (enum `Thread.State`):
+
+```
+NEW → RUNNABLE → (BLOCKED/WAITING/TIMED_WAITING) → RUNNABLE → TERMINATED
+```
+
+**1. NEW:**
+- Thread được tạo nhưng chưa start()
+- `Thread thread = new Thread(() -> {})`
+
+**2. RUNNABLE:**
+- Thread đang chạy hoặc sẵn sàng chạy (đợi CPU)
+- Sau khi gọi `start()`
+
+**3. BLOCKED:**
+- Thread đang chờ monitor lock (synchronized)
+- Ví dụ: đợi vào synchronized block
+
+**4. WAITING:**
+- Thread đang chờ vô thời hạn
+- Gây ra bởi: `wait()`, `join()`, `LockSupport.park()`
+
+**5. TIMED_WAITING:**
+- Thread đang chờ có thời hạn
+- Gây ra bởi: `sleep()`, `wait(timeout)`, `join(timeout)`
+
+**6. TERMINATED:**
+- Thread đã hoàn thành run()
+
+```java
+Thread thread = new Thread(() -> {
+    try {
+        Thread.sleep(1000);
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+});
+
+System.out.println(thread.getState());  // NEW
+
+thread.start();
+System.out.println(thread.getState());  // RUNNABLE
+
+Thread.sleep(100);
+System.out.println(thread.getState());  // TIMED_WAITING (do sleep)
+
+thread.join();  // Đợi thread kết thúc
+System.out.println(thread.getState());  // TERMINATED
+```
+
+---
+
+**Thread Methods:**
+
+**sleep(milliseconds):**
+- Tạm dừng thread hiện tại trong khoảng thời gian
+- **Không nhả lock** (nếu đang trong synchronized)
+- Throws `InterruptedException`
+
+```java
+// ✅ sleep
+try {
+    Thread.sleep(1000);  // Sleep 1 giây
+} catch (InterruptedException e) {
+    e.printStackTrace();
+}
+```
+
+**join():**
+- Chờ thread kết thúc
+- Có thể có timeout: `join(milliseconds)`
+
+```java
+// ✅ join - đợi thread kết thúc
+Thread thread = new Thread(() -> {
+    System.out.println("Working...");
+    try { Thread.sleep(2000); } catch (InterruptedException e) {}
+});
+
+thread.start();
+thread.join();  // Main thread đợi thread kết thúc
+System.out.println("Thread finished");
+```
+
+**interrupt():**
+- Gửi interrupt signal đến thread
+- Thread cần check và handle interrupt
+
+```java
+// ✅ interrupt
+Thread thread = new Thread(() -> {
+    while (!Thread.currentThread().isInterrupted()) {
+        System.out.println("Working...");
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();  // Restore interrupt status
+            break;
+        }
+    }
+});
+
+thread.start();
+Thread.sleep(3000);
+thread.interrupt();  // Interrupt thread
+```
+
+**isAlive():**
+- Kiểm tra thread còn đang chạy
+
+```java
+Thread thread = new Thread(() -> {});
+System.out.println(thread.isAlive());  // false (chưa start)
+
+thread.start();
+System.out.println(thread.isAlive());  // true (đang chạy)
+
+thread.join();
+System.out.println(thread.isAlive());  // false (đã kết thúc)
+```
+
+**setName() / getName():**
+- Đặt/lấy tên thread
+
+```java
+Thread thread = new Thread(() -> {});
+thread.setName("MyWorker");
+System.out.println(thread.getName());  // "MyWorker"
+```
+
+**setPriority() / getPriority():**
+- Đặt/lấy độ ưu tiên (1-10)
+- MIN_PRIORITY = 1, NORM_PRIORITY = 5, MAX_PRIORITY = 10
+- **Lưu ý:** Priority chỉ là gợi ý cho scheduler, không đảm bảo
+
+```java
+Thread thread = new Thread(() -> {});
+thread.setPriority(Thread.MAX_PRIORITY);  // 10
+System.out.println(thread.getPriority());  // 10
+```
+
+**setDaemon() / isDaemon():**
+- Daemon thread: thread chạy nền, JVM thoát khi chỉ còn daemon threads
+- Phải gọi **trước** `start()`
+
+```java
+Thread daemon = new Thread(() -> {
+    while (true) {
+        System.out.println("Daemon running");
+        try { Thread.sleep(1000); } catch (InterruptedException e) {}
+    }
+});
+
+daemon.setDaemon(true);  // Phải gọi trước start()
+daemon.start();
+
+// JVM sẽ thoát khi main thread kết thúc, không đợi daemon
+```
+
+---
+
+**⚠️ Các trường hợp hay gặp trong thi:**
+
+```java
+// ❌ Gọi start() nhiều lần
+Thread thread = new Thread(() -> {});
+thread.start();
+thread.start();  // IllegalThreadStateException
+
+// ❌ setDaemon() sau khi start()
+Thread thread = new Thread(() -> {});
+thread.start();
+thread.setDaemon(true);  // IllegalThreadStateException
+
+// ⚠️ sleep() trong synchronized - KHÔNG nhả lock
+synchronized(lock) {
+    Thread.sleep(1000);  // Vẫn giữ lock!
+}
+
+// ✅ wait() trong synchronized - nhả lock
+synchronized(lock) {
+    lock.wait(1000);  // Nhả lock
+}
+
+// ⚠️ join() có thể throw InterruptedException
+Thread thread = new Thread(() -> {});
+thread.start();
+thread.join();  // Must handle InterruptedException
+
+// ⚠️ Không thể restart thread đã TERMINATED
+Thread thread = new Thread(() -> {});
+thread.start();
+thread.join();
+thread.start();  // IllegalThreadStateException
+```
+
+---
+
+### 7.1. Executor Framework
+
+**Runnable vs Callable:**
+
+**Runnable:** Interface đại diện cho task không trả về kết quả
+- Method: `void run()` - không throws exception, không có return value
+- Thường dùng cho các task không cần kết quả
+
+**Callable<T>:** Interface đại diện cho task có trả về kết quả
+- Method: `T call() throws Exception` - có thể throws exception và có return value
+- Thường dùng khi cần kết quả từ task
+
+```java
+// ✅ Runnable - không return
+Runnable task1 = () -> System.out.println("Running task");
+
+// ✅ Callable - có return
+Callable<String> task2 = () -> {
+    Thread.sleep(1000);
+    return "Task completed";
+};
+```
+
+---
+
+**Executor Framework Hierarchy:**
+
+```
+Executor (interface)
+    └── ExecutorService (interface)
+            └── ScheduledExecutorService (interface)
+```
+
+**Executor:** Functional interface cơ bản nhất
+- Method: `void execute(Runnable command)`
+- Chỉ thực thi task, không quản lý lifecycle
+
+**ExecutorService:** Mở rộng của Executor, cung cấp quản lý vòng đời thread pool
+- Methods chính:
+  - `Future<?> submit(Runnable task)` - submit task và trả về Future
+  - `<T> Future<T> submit(Callable<T> task)` - submit task với return value
+  - `void execute(Runnable command)` - thực thi task (kế thừa từ Executor)
+  - `void shutdown()` - ngừng nhận task mới, đợi task hiện tại hoàn thành
+  - `List<Runnable> shutdownNow()` - dừng ngay, trả về danh sách task chưa chạy
+  - `boolean awaitTermination(long timeout, TimeUnit unit)` - chờ tất cả task kết thúc
+  - `<T> List<Future<T>> invokeAll(Collection<Callable<T>> tasks)` - thực thi tất cả tasks
+  - `<T> T invokeAny(Collection<Callable<T>> tasks)` - trả về kết quả của task hoàn thành đầu tiên
+
+```java
+// ✅ Tạo ExecutorService
+ExecutorService executor = Executors.newFixedThreadPool(5);
+
+// ✅ Submit tasks
+Future<String> future = executor.submit(() -> "Result");
+
+// ✅ Shutdown
+executor.shutdown();  // Không nhận task mới
+executor.awaitTermination(1, TimeUnit.MINUTES);  // Đợi tối đa 1 phút
+```
+
+---
+
+**Executors Factory Methods:**
+
+Class `Executors` cung cấp các factory methods để tạo ExecutorService:
+
+**1. newFixedThreadPool(int nThreads):**
+- Tạo thread pool với số lượng thread cố định
+- Các task chờ trong queue nếu tất cả threads đang busy
+- Thread không bị hủy, tồn tại cho đến khi shutdown
+
+```java
+// ✅ Fixed thread pool
+ExecutorService executor = Executors.newFixedThreadPool(5);
+for (int i = 0; i < 100; i++) {
+    executor.submit(() -> {
+        System.out.println(Thread.currentThread().getName());
+    });
+}
+// Chỉ có 5 threads xử lý 100 tasks
+```
+
+**2. newSingleThreadExecutor():**
+- Tương đương với `newFixedThreadPool(1)`
+- Chỉ có 1 thread duy nhất xử lý tasks tuần tự
+- Đảm bảo thứ tự thực thi tasks theo FIFO
+
+```java
+// ✅ Single thread executor
+ExecutorService executor = Executors.newSingleThreadExecutor();
+executor.submit(() -> System.out.println("Task 1"));
+executor.submit(() -> System.out.println("Task 2"));
+// Task 2 chỉ chạy sau khi Task 1 hoàn thành
+```
+
+**3. newCachedThreadPool():**
+- Không giới hạn số lượng threads
+- Tạo thread mới nếu không có thread rảnh
+- Tái sử dụng thread rảnh nếu có (timeout 60 giây)
+- Thread không sử dụng quá 60 giây sẽ bị hủy
+- **Rủi ro:** Có thể gây OutOfMemoryError nếu tạo quá nhiều threads
+- **Phù hợp:** Các task ngắn, hoàn thành nhanh
+
+```java
+// ✅ Cached thread pool
+ExecutorService executor = Executors.newCachedThreadPool();
+for (int i = 0; i < 1000; i++) {
+    executor.submit(() -> {
+        // Short-lived task
+        doQuickWork();
+    });
+}
+// Có thể tạo rất nhiều threads nếu tasks đến nhanh
+```
+
+**4. newScheduledThreadPool(int corePoolSize):**
+- Cho phép lên lịch thực thi task (delay hoặc định kỳ)
+- Trả về `ScheduledExecutorService`
+
+```java
+// ✅ Scheduled thread pool
+ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(3);
+
+// Chạy sau 5 giây
+scheduler.schedule(() -> System.out.println("Delayed task"), 5, TimeUnit.SECONDS);
+
+// Chạy định kỳ mỗi 1 giây, bắt đầu sau 2 giây
+scheduler.scheduleAtFixedRate(
+    () -> System.out.println("Periodic task"),
+    2,  // initial delay
+    1,  // period
+    TimeUnit.SECONDS
+);
+
+// Chạy định kỳ, delay 1 giây giữa lần kết thúc và lần bắt đầu tiếp theo
+scheduler.scheduleWithFixedDelay(
+    () -> System.out.println("Fixed delay task"),
+    2,  // initial delay
+    1,  // delay between executions
+    TimeUnit.SECONDS
+);
+```
+
+---
+
+**Submitting Tasks:**
+
+**1. execute(Runnable):**
+- Không trả về kết quả
+- Không biết task thành công hay thất bại
+- Exception xảy ra trong worker thread, không lan ra thread gọi
+
+```java
+// ✅ execute - fire and forget
+executor.execute(() -> {
+    System.out.println("Task running");
+    // Exception ở đây chỉ ảnh hưởng worker thread
+});
+```
+
+**2. submit(Runnable):**
+- Trả về `Future<?>`
+- `Future.get()` trả về `null` nếu thành công
+- Exception được wrap trong Future, chỉ throw khi gọi `Future.get()`
+
+```java
+// ✅ submit Runnable
+Future<?> future = executor.submit(() -> {
+    System.out.println("Task running");
+    if (someCondition) {
+        throw new RuntimeException("Error!");
+    }
+});
+
+try {
+    future.get();  // null nếu thành công, throw Exception nếu có lỗi
+} catch (ExecutionException e) {
+    Throwable cause = e.getCause();  // Lấy exception gốc
+}
+```
+
+**3. submit(Callable<T>):**
+- Trả về `Future<T>`
+- `Future.get()` trả về giá trị của `call()`
+- Exception được wrap trong Future
+
+```java
+// ✅ submit Callable
+Future<Integer> future = executor.submit(() -> {
+    Thread.sleep(1000);
+    return 42;
+});
+
+try {
+    Integer result = future.get();  // 42
+    System.out.println(result);
+} catch (ExecutionException e) {
+    // Handle exception from call()
+}
+```
+
+---
+
+**Future<T> Interface:**
+
+Đại diện cho kết quả của một async computation.
+
+**Methods:**
+
+```java
+Future<String> future = executor.submit(() -> {
+    Thread.sleep(2000);
+    return "Done";
+});
+
+// ✅ get() - block cho đến khi task hoàn thành
+String result = future.get();  // Đợi vô hạn
+
+// ✅ get(timeout, unit) - block với timeout
+try {
+    String result = future.get(1, TimeUnit.SECONDS);
+} catch (TimeoutException e) {
+    System.out.println("Task timed out");
+}
+
+// ✅ cancel(boolean mayInterruptIfRunning)
+future.cancel(true);   // Ngắt thread nếu đang chạy
+future.cancel(false);  // Chỉ cancel nếu chưa chạy
+
+// ✅ isCancelled() - kiểm tra đã bị cancel
+boolean cancelled = future.isCancelled();
+
+// ✅ isDone() - kiểm tra đã hoàn thành
+// true nếu: hoàn thành bình thường, bị cancel, hoặc có exception
+boolean done = future.isDone();
+```
+
+**⚠️ Lưu ý:**
+```java
+// ❌ Calling get() on infinite task - block forever
+Future<Void> future = executor.submit(() -> {
+    while (true) {
+        // Infinite loop
+    }
+});
+future.get();  // Block vô hạn!
+
+// ✅ Sử dụng timeout
+try {
+    future.get(5, TimeUnit.SECONDS);
+} catch (TimeoutException e) {
+    future.cancel(true);  // Cancel task
+}
+```
+
+---
+
+**invokeAll() và invokeAny():**
+
+```java
+// ✅ invokeAll - thực thi tất cả tasks, đợi tất cả hoàn thành
+List<Callable<String>> tasks = List.of(
+    () -> "Task 1",
+    () -> "Task 2",
+    () -> "Task 3"
+);
+
+List<Future<String>> futures = executor.invokeAll(tasks);
+for (Future<String> future : futures) {
+    System.out.println(future.get());  // Đã hoàn thành rồi
+}
+
+// ✅ invokeAny - trả về kết quả của task hoàn thành đầu tiên
+String result = executor.invokeAny(tasks);  // "Task 1" hoặc "Task 2" hoặc "Task 3"
+// Các task khác bị cancel
+```
+
+---
+
+**Exception Handling:**
+
+```java
+// ❌ execute() - exception không được catch
+executor.execute(() -> {
+    throw new RuntimeException("Error in execute");
+    // Exception printed to console, không thể catch
+});
+
+// ✅ submit() - exception wrapped in Future
+Future<?> future = executor.submit(() -> {
+    throw new RuntimeException("Error in submit");
+});
+
+try {
+    future.get();
+} catch (ExecutionException e) {
+    System.out.println("Caught: " + e.getCause().getMessage());
+}
+```
+
+---
+
+**Shutdown ExecutorService:**
+
+```java
+// ✅ Graceful shutdown
+executor.shutdown();  // Không nhận task mới
+// Các task đang chạy và đang chờ sẽ tiếp tục
+
+// Đợi tất cả tasks hoàn thành
+if (!executor.awaitTermination(1, TimeUnit.MINUTES)) {
+    // Timeout - force shutdown
+    executor.shutdownNow();
+}
+
+// ❌ Force shutdown
+List<Runnable> pendingTasks = executor.shutdownNow();
+// Ngắt tất cả threads, trả về danh sách tasks chưa chạy
+```
+
+**⚠️ Các trường hợp hay gặp trong thi:**
+
+```java
+// ❌ Quên shutdown - program không thoát
+ExecutorService executor = Executors.newFixedThreadPool(5);
+executor.submit(() -> System.out.println("Task"));
+// Threads vẫn chạy, JVM không thoát!
+
+// ✅ Luôn shutdown
+executor.shutdown();
+
+// ❌ Submit task sau khi shutdown
+executor.shutdown();
+executor.submit(() -> System.out.println("Task"));  // RejectedExecutionException
+
+// ⚠️ awaitTermination không shutdown
+executor.awaitTermination(1, TimeUnit.MINUTES);  // Chỉ đợi, không shutdown!
+// Phải gọi shutdown() trước
+
+// ✅ Đúng cách
+executor.shutdown();
+executor.awaitTermination(1, TimeUnit.MINUTES);
+
+// ⚠️ Callable vs Runnable với submit
+Future<String> f1 = executor.submit(() -> "Result");  // Callable
+Future<?> f2 = executor.submit(() -> System.out.println("Task"));  // Runnable
+
+f1.get();  // "Result"
+f2.get();  // null
+```
+
+---
+
+### 7.2. Synchronization
+
+**synchronized Keyword:**
+
+Từ khóa `synchronized` được dùng để đảm bảo chỉ một thread được truy cập critical section (đoạn mã quan trọng) tại một thời điểm, tránh race condition.
+
+**synchronized Block:**
+
+```java
+// ✅ synchronized với object
+private Object lock = new Object();
+
+public void method() {
+    synchronized (lock) {
+        // Critical section
+        // Chỉ 1 thread có thể vào đây tại một thời điểm
+    }
+}
+
+// ✅ synchronized với this
+public void method() {
+    synchronized (this) {
+        // Lock trên instance hiện tại
+    }
+}
+
+// ✅ synchronized với class
+public void method() {
+    synchronized (MyClass.class) {
+        // Lock trên class object
+        // Tất cả instances chia sẻ chung lock này
+    }
+}
+```
+
+**synchronized Method:**
+
+```java
+// ✅ synchronized instance method
+// Tương đương: synchronized(this)
+public synchronized void instanceMethod() {
+    // Chỉ 1 thread trên cùng 1 instance tại một thời điểm
+    // Các instance khác vẫn có thể chạy song song
+}
+
+// ✅ synchronized static method
+// Tương đương: synchronized(MyClass.class)
+public static synchronized void staticMethod() {
+    // Chỉ 1 thread trên tất cả instances tại một thời điểm
+    // Lock được chia sẻ giữa tất cả instances
+}
+```
+
+**⚠️ Lưu ý về Locks:**
+
+```java
+class Counter {
+    private int count = 0;
+
+    // ✅ Instance method - lock trên this
+    public synchronized void increment() {
+        count++;
+    }
+}
+
+Counter c1 = new Counter();
+Counter c2 = new Counter();
+
+// c1 và c2 có locks riêng biệt
+// 2 threads có thể chạy song song trên c1 và c2
+Thread t1 = new Thread(() -> c1.increment());
+Thread t2 = new Thread(() -> c2.increment());  // Không bị block bởi t1
+
+// ❌ Không nên lock trên object có thể thay đổi
+private String lock = "lock";  // String pooling!
+synchronized(lock) { }  // Nguy hiểm!
+
+// ✅ Nên dùng final Object
+private final Object lock = new Object();
+synchronized(lock) { }
+```
+
+**Monitor Lock:**
+
+Mỗi object trong Java có một **monitor lock** (intrinsic lock). Khi thread acquire lock, các threads khác phải chờ trong **wait set** (hàng đợi).
+
+```java
+class BankAccount {
+    private int balance = 100;
+    private final Object lock = new Object();
+
+    public void withdraw(int amount) {
+        synchronized(lock) {  // Acquire monitor lock
+            if (balance >= amount) {
+                balance -= amount;
+            }
+        }  // Release monitor lock
+    }
+
+    public void deposit(int amount) {
+        synchronized(lock) {  // Cùng lock với withdraw
+            balance += amount;
+        }
+    }
+}
+```
+
+---
+
+**wait(), notify(), notifyAll():**
+
+Các methods này thuộc class `Object`, dùng để thread communication trong synchronized block.
+
+**wait():**
+- Thread nhả lock và vào **WAITING** state
+- Thread chờ cho đến khi được notify
+- **Phải gọi trong synchronized block**
+
+**notify():**
+- Đánh thức **1 thread bất kỳ** đang wait trên cùng lock
+- Thread được đánh thức sẽ cạnh tranh lại để acquire lock
+
+**notifyAll():**
+- Đánh thức **TẤT CẢ threads** đang wait trên cùng lock
+- Tất cả threads sẽ cạnh tranh để acquire lock
+
+```java
+class ProducerConsumer {
+    private final List<Integer> queue = new ArrayList<>();
+    private final int MAX = 5;
+    private final Object lock = new Object();
+
+    public void produce(int value) throws InterruptedException {
+        synchronized(lock) {
+            // Đợi nếu queue đầy
+            while (queue.size() == MAX) {
+                lock.wait();  // Nhả lock và đợi
+            }
+
+            queue.add(value);
+            System.out.println("Produced: " + value);
+
+            lock.notifyAll();  // Đánh thức consumer
+        }
+    }
+
+    public int consume() throws InterruptedException {
+        synchronized(lock) {
+            // Đợi nếu queue rỗng
+            while (queue.isEmpty()) {
+                lock.wait();  // Nhả lock và đợi
+            }
+
+            int value = queue.remove(0);
+            System.out.println("Consumed: " + value);
+
+            lock.notifyAll();  // Đánh thức producer
+            return value;
+        }
+    }
+}
+```
+
+**⚠️ Các trường hợp hay gặp trong thi:**
+
+```java
+// ❌ wait() ngoài synchronized block
+Object lock = new Object();
+lock.wait();  // IllegalMonitorStateException
+
+// ✅ Phải gọi trong synchronized
+synchronized(lock) {
+    lock.wait();  // OK
+}
+
+// ❌ Dùng if thay vì while
+synchronized(lock) {
+    if (condition) {
+        lock.wait();  // Có thể bị spurious wakeup!
+    }
+}
+
+// ✅ Luôn dùng while
+synchronized(lock) {
+    while (condition) {
+        lock.wait();  // Re-check sau khi wake up
+    }
+}
+
+// ⚠️ notify() vs notifyAll()
+// notify() - chỉ đánh thức 1 thread (không biết thread nào)
+// notifyAll() - đánh thức tất cả (an toàn hơn)
+
+synchronized(lock) {
+    lock.notify();     // Có thể gây deadlock nếu đánh thức sai thread
+    lock.notifyAll();  // An toàn hơn nhưng overhead cao hơn
+}
+```
+
+---
+
+**ReentrantLock:**
+
+`ReentrantLock` là alternative của `synchronized`, cung cấp nhiều tính năng hơn.
+
+**Ưu điểm so với synchronized:**
+- Có thể **try lock** mà không block
+- Có thể **interrupt** thread đang đợi lock
+- Có thể **timeout** khi chờ lock
+- Hỗ trợ **fair locking** (FIFO)
+- Hỗ trợ nhiều **Condition** objects
+
+**Nhược điểm:**
+- Phải **unlock thủ công** (dễ quên)
+- Nên dùng trong try-finally để đảm bảo unlock
+
+```java
+import java.util.concurrent.locks.ReentrantLock;
+
+class Counter {
+    private int count = 0;
+    private final ReentrantLock lock = new ReentrantLock();
+
+    // ✅ Luôn dùng try-finally
+    public void increment() {
+        lock.lock();
+        try {
+            count++;
+        } finally {
+            lock.unlock();  // Đảm bảo luôn unlock
+        }
+    }
+
+    // ✅ tryLock - không block
+    public boolean tryIncrement() {
+        if (lock.tryLock()) {  // Acquire ngay, không chờ
+            try {
+                count++;
+                return true;
+            } finally {
+                lock.unlock();
+            }
+        }
+        return false;  // Không acquire được lock
+    }
+
+    // ✅ tryLock với timeout
+    public boolean tryIncrementWithTimeout() throws InterruptedException {
+        if (lock.tryLock(1, TimeUnit.SECONDS)) {  // Chờ tối đa 1 giây
+            try {
+                count++;
+                return true;
+            } finally {
+                lock.unlock();
+            }
+        }
+        return false;
+    }
+
+    // ✅ lockInterruptibly - có thể bị interrupt
+    public void incrementInterruptibly() throws InterruptedException {
+        lock.lockInterruptibly();
+        try {
+            count++;
+        } finally {
+            lock.unlock();
+        }
+    }
+}
+```
+
+**Fair vs Unfair Lock:**
+
+```java
+// ✅ Unfair lock (default) - hiệu suất cao hơn
+ReentrantLock unfairLock = new ReentrantLock();
+
+// ✅ Fair lock - FIFO, tránh starvation
+ReentrantLock fairLock = new ReentrantLock(true);
+```
+
+**⚠️ Các trường hợp hay gặp trong thi:**
+
+```java
+ReentrantLock lock = new ReentrantLock();
+
+// ❌ Quên unlock - deadlock!
+lock.lock();
+count++;
+// Quên unlock!
+
+// ✅ Luôn dùng try-finally
+lock.lock();
+try {
+    count++;
+} finally {
+    lock.unlock();
+}
+
+// ❌ unlock mà không lock
+lock.unlock();  // IllegalMonitorStateException
+
+// ❌ unlock nhiều hơn lock
+lock.lock();
+try {
+    count++;
+} finally {
+    lock.unlock();
+    lock.unlock();  // IllegalMonitorStateException
+}
+```
+
+---
+
+**Condition:**
+
+`Condition` là alternative của `wait()/notify()`, cung cấp nhiều wait queues cho cùng 1 lock.
+
+```java
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+
+class BoundedBuffer {
+    private final List<Integer> buffer = new ArrayList<>();
+    private final int MAX = 5;
+
+    private final ReentrantLock lock = new ReentrantLock();
+    private final Condition notFull = lock.newCondition();   // Queue cho producer
+    private final Condition notEmpty = lock.newCondition();  // Queue cho consumer
+
+    public void produce(int value) throws InterruptedException {
+        lock.lock();
+        try {
+            // Đợi nếu buffer đầy
+            while (buffer.size() == MAX) {
+                notFull.await();  // Tương đương wait()
+            }
+
+            buffer.add(value);
+            System.out.println("Produced: " + value);
+
+            notEmpty.signal();  // Đánh thức consumer (tương đương notify())
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public int consume() throws InterruptedException {
+        lock.lock();
+        try {
+            // Đợi nếu buffer rỗng
+            while (buffer.isEmpty()) {
+                notEmpty.await();
+            }
+
+            int value = buffer.remove(0);
+            System.out.println("Consumed: " + value);
+
+            notFull.signal();  // Đánh thức producer
+            return value;
+        } finally {
+            lock.unlock();
+        }
+    }
+}
+```
+
+**Condition Methods:**
+
+| wait/notify | Condition | Mô tả |
+|-------------|-----------|-------|
+| `wait()` | `await()` | Nhả lock và đợi |
+| `wait(timeout)` | `await(timeout, unit)` | Đợi với timeout |
+| `notify()` | `signal()` | Đánh thức 1 thread |
+| `notifyAll()` | `signalAll()` | Đánh thức tất cả threads |
+
+**⚠️ Lưu ý:**
+```java
+// ❌ await() ngoài lock
+Condition condition = lock.newCondition();
+condition.await();  // IllegalMonitorStateException
+
+// ✅ Phải gọi sau khi lock
+lock.lock();
+try {
+    condition.await();  // OK
+} finally {
+    lock.unlock();
+}
+```
+
+---
+
+**volatile Keyword:**
+
+`volatile` đảm bảo **visibility** - mọi thread đều thấy giá trị mới nhất của biến.
+
+**Khi dùng volatile:**
+- Đọc/ghi biến đơn giản (không có compound operations)
+- Không cần atomic operations
+- Biến được ghi bởi 1 thread, đọc bởi nhiều threads
+
+**volatile không đảm bảo atomicity:**
+
+```java
+class VolatileExample {
+    private volatile boolean flag = false;
+    private volatile int counter = 0;
+
+    // ✅ OK - đọc/ghi đơn giản
+    public void setFlag() {
+        flag = true;  // Atomic
+    }
+
+    public boolean getFlag() {
+        return flag;  // Luôn đọc giá trị mới nhất
+    }
+
+    // ❌ NOT thread-safe - compound operation
+    public void increment() {
+        counter++;  // Read-Modify-Write - KHÔNG atomic!
+    }
+}
+```
+
+**volatile vs synchronized:**
+
+```java
+// ✅ volatile - chỉ đảm bảo visibility
+private volatile boolean running = true;
+
+public void stop() {
+    running = false;  // Thread khác sẽ thấy ngay
+}
+
+public void run() {
+    while (running) {  // Luôn đọc giá trị mới nhất
+        // ...
+    }
+}
+
+// ✅ synchronized - đảm bảo cả atomicity và visibility
+private int count = 0;
+
+public synchronized void increment() {
+    count++;  // Atomic và visible
+}
+```
+
+**⚠️ Các trường hợp hay gặp trong thi:**
+
+```java
+// ❌ volatile không đảm bảo atomicity
+private volatile int count = 0;
+
+public void increment() {
+    count++;  // KHÔNG thread-safe! (3 operations: read, increment, write)
+}
+
+// ✅ Cần synchronized hoặc AtomicInteger
+private int count = 0;
+
+public synchronized void increment() {
+    count++;  // Thread-safe
+}
+
+// Hoặc
+private AtomicInteger count = new AtomicInteger(0);
+
+public void increment() {
+    count.incrementAndGet();  // Thread-safe
+}
+
+// ✅ volatile phù hợp cho flag
+private volatile boolean stopped = false;
+
+public void shutdown() {
+    stopped = true;
+}
+
+public void run() {
+    while (!stopped) {
+        // Do work
+    }
+}
+```
+
+---
+
+### 7.3. Atomic Variables
+
+Package `java.util.concurrent.atomic` cung cấp các class hỗ trợ atomic operations mà không cần synchronized.
+
+**Các class chính:**
+- `AtomicInteger` - atomic int operations
+- `AtomicLong` - atomic long operations
+- `AtomicBoolean` - atomic boolean operations
+- `AtomicReference<V>` - atomic object reference operations
+
+**Ưu điểm:**
+- Thread-safe mà không cần synchronized
+- Hiệu suất cao hơn synchronized (lock-free)
+- Hỗ trợ compare-and-swap (CAS) operations
+
+---
+
+**AtomicInteger:**
+
+```java
+import java.util.concurrent.atomic.AtomicInteger;
+
+AtomicInteger counter = new AtomicInteger(0);
+
+// ✅ get() - lấy giá trị
+int value = counter.get();  // 0
+
+// ✅ set() - đặt giá trị
+counter.set(10);
+
+// ✅ incrementAndGet() - tăng và trả về giá trị mới
+int newValue = counter.incrementAndGet();  // 11
+
+// ✅ getAndIncrement() - trả về giá trị cũ và tăng
+int oldValue = counter.getAndIncrement();  // 11, counter = 12
+
+// ✅ decrementAndGet() - giảm và trả về giá trị mới
+int decreased = counter.decrementAndGet();  // 11
+
+// ✅ getAndDecrement() - trả về giá trị cũ và giảm
+int old = counter.getAndDecrement();  // 11, counter = 10
+
+// ✅ addAndGet(delta) - cộng và trả về giá trị mới
+int result = counter.addAndGet(5);  // 15
+
+// ✅ getAndAdd(delta) - trả về giá trị cũ và cộng
+int prev = counter.getAndAdd(5);  // 15, counter = 20
+
+// ✅ compareAndSet(expect, update) - CAS operation
+boolean success = counter.compareAndSet(20, 100);  // true nếu counter = 20
+// Nếu true: counter = 100
+// Nếu false: counter không đổi
+
+// ✅ getAndSet(newValue) - đặt giá trị mới và trả về giá trị cũ
+int previous = counter.getAndSet(50);  // 100, counter = 50
+```
+
+**Thread-safe Counter Example:**
+
+```java
+// ❌ Không thread-safe
+class UnsafeCounter {
+    private int count = 0;
+
+    public void increment() {
+        count++;  // NOT atomic!
+    }
+
+    public int getCount() {
+        return count;
+    }
+}
+
+// ✅ Thread-safe với AtomicInteger
+class SafeCounter {
+    private AtomicInteger count = new AtomicInteger(0);
+
+    public void increment() {
+        count.incrementAndGet();  // Atomic!
+    }
+
+    public int getCount() {
+        return count.get();
+    }
+}
+```
+
+---
+
+**AtomicLong:**
+
+Tương tự `AtomicInteger`, dùng cho `long`:
+
+```java
+import java.util.concurrent.atomic.AtomicLong;
+
+AtomicLong counter = new AtomicLong(0L);
+
+counter.incrementAndGet();     // Tăng
+counter.getAndIncrement();     // Tăng
+counter.decrementAndGet();     // Giảm
+counter.addAndGet(100L);       // Cộng
+counter.compareAndSet(100L, 200L);  // CAS
+```
+
+---
+
+**AtomicBoolean:**
+
+```java
+import java.util.concurrent.atomic.AtomicBoolean;
+
+AtomicBoolean flag = new AtomicBoolean(false);
+
+// ✅ get() và set()
+boolean value = flag.get();  // false
+flag.set(true);
+
+// ✅ getAndSet() - atomic swap
+boolean oldValue = flag.getAndSet(false);  // true, flag = false
+
+// ✅ compareAndSet(expect, update)
+boolean success = flag.compareAndSet(false, true);  // true nếu flag = false
+```
+
+**Use case - One-time initialization:**
+
+```java
+class Initializer {
+    private final AtomicBoolean initialized = new AtomicBoolean(false);
+
+    public void initialize() {
+        // Chỉ thread đầu tiên được initialize
+        if (initialized.compareAndSet(false, true)) {
+            // Perform initialization
+            System.out.println("Initializing...");
+        } else {
+            System.out.println("Already initialized");
+        }
+    }
+}
+```
+
+---
+
+**AtomicReference<V>:**
+
+Atomic operations trên object reference:
+
+```java
+import java.util.concurrent.atomic.AtomicReference;
+
+AtomicReference<String> ref = new AtomicReference<>("Initial");
+
+// ✅ get() và set()
+String value = ref.get();  // "Initial"
+ref.set("Updated");
+
+// ✅ getAndSet()
+String old = ref.getAndSet("New");  // "Updated", ref = "New"
+
+// ✅ compareAndSet(expect, update)
+boolean success = ref.compareAndSet("New", "Final");  // true
+// Nếu ref = "New" thì ref = "Final"
+
+// ✅ Use case - immutable updates
+class Person {
+    private final String name;
+    private final int age;
+
+    Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    Person withAge(int newAge) {
+        return new Person(this.name, newAge);
+    }
+}
+
+AtomicReference<Person> personRef = new AtomicReference<>(new Person("John", 30));
+
+// Atomic update
+Person current, updated;
+do {
+    current = personRef.get();
+    updated = current.withAge(31);
+} while (!personRef.compareAndSet(current, updated));
+```
+
+---
+
+**compareAndSet() - Compare-And-Swap:**
+
+CAS là operation cơ bản của atomic classes:
+
+```java
+AtomicInteger counter = new AtomicInteger(10);
+
+// ✅ compareAndSet(expectedValue, newValue)
+boolean result = counter.compareAndSet(10, 20);
+// Nếu counter = 10 (expected):
+//   - Set counter = 20
+//   - Return true
+// Nếu counter != 10:
+//   - Không thay đổi
+//   - Return false
+
+System.out.println(result);       // true
+System.out.println(counter.get()); // 20
+
+// ❌ CAS thất bại
+boolean fail = counter.compareAndSet(10, 30);  // false (counter = 20, not 10)
+System.out.println(counter.get());  // 20 (không đổi)
+```
+
+**CAS Loop Pattern:**
+
+```java
+AtomicInteger counter = new AtomicInteger(0);
+
+// ✅ Atomic increment với CAS
+public void increment() {
+    int current;
+    int next;
+    do {
+        current = counter.get();
+        next = current + 1;
+    } while (!counter.compareAndSet(current, next));
+}
+
+// Tương đương với counter.incrementAndGet()
+```
+
+---
+
+**⚠️ Các trường hợp hay gặp trong thi:**
+
+```java
+// ⚠️ get() + set() KHÔNG atomic
+AtomicInteger counter = new AtomicInteger(0);
+
+// ❌ Không thread-safe!
+int value = counter.get();
+counter.set(value + 1);  // Race condition!
+
+// ✅ Dùng incrementAndGet()
+counter.incrementAndGet();  // Thread-safe
+
+// ⚠️ Multiple operations không atomic
+AtomicInteger a = new AtomicInteger(0);
+AtomicInteger b = new AtomicInteger(0);
+
+// ❌ Không atomic khi update cả 2
+a.incrementAndGet();
+b.incrementAndGet();
+// Thread khác có thể thấy a tăng nhưng b chưa
+
+// ✅ Cần synchronized nếu cần atomic cho nhiều operations
+synchronized(lock) {
+    a.incrementAndGet();
+    b.incrementAndGet();
+}
+
+// ⚠️ AtomicReference với mutable objects
+class MutablePerson {
+    private String name;
+    public void setName(String name) { this.name = name; }
+}
+
+AtomicReference<MutablePerson> ref = new AtomicReference<>(new MutablePerson());
+
+// ❌ Reference là atomic nhưng mutations KHÔNG!
+ref.get().setName("John");  // NOT thread-safe!
+
+// ✅ Nên dùng với immutable objects
+```
+
+---
+
+### 7.4. Concurrent Collections
+
+Package `java.util.concurrent` cung cấp các collection implementations thread-safe với hiệu suất cao.
+
+**Các interface và implementations:**
+
+**List:**
+- `CopyOnWriteArrayList` - thread-safe ArrayList
+
+**Set:**
+- `CopyOnWriteArraySet` - thread-safe Set
+- `ConcurrentSkipListSet` - thread-safe sorted Set
+
+**Map:**
+- `ConcurrentHashMap` - thread-safe HashMap
+- `ConcurrentSkipListMap` - thread-safe sorted Map
+
+**Queue:**
+- `ConcurrentLinkedQueue` - thread-safe unbounded queue
+- `LinkedBlockingQueue` - thread-safe bounded/unbounded blocking queue
+- `ArrayBlockingQueue` - thread-safe bounded blocking queue
+- `PriorityBlockingQueue` - thread-safe priority queue
+
+---
+
+**CopyOnWriteArrayList:**
+
+Thread-safe ArrayList, copy toàn bộ array khi modify (write).
+
+**Đặc điểm:**
+- **Thread-safe** mà không cần external synchronization
+- **Iterators** không throw `ConcurrentModificationException`
+- **Snapshot iteration** - iterator thấy trạng thái tại thời điểm tạo
+- **Chậm** khi write (do copy), **nhanh** khi read
+- **Phù hợp:** Nhiều read, ít write
+
+```java
+import java.util.concurrent.CopyOnWriteArrayList;
+
+CopyOnWriteArrayList<String> list = new CopyOnWriteArrayList<>();
+
+// ✅ Thread-safe add
+list.add("A");
+list.add("B");
+list.add("C");
+
+// ✅ Iterator không throw ConcurrentModificationException
+Iterator<String> it = list.iterator();
+list.add("D");  // Modify during iteration
+while (it.hasNext()) {
+    System.out.println(it.next());  // A, B, C (không thấy "D")
+}
+
+// ✅ Multiple threads
+ExecutorService executor = Executors.newFixedThreadPool(10);
+for (int i = 0; i < 100; i++) {
+    executor.submit(() -> list.add("Item"));
+}
+// Thread-safe, không cần synchronized
+```
+
+**⚠️ Lưu ý:**
+
+```java
+// ⚠️ Iterator là snapshot
+CopyOnWriteArrayList<String> list = new CopyOnWriteArrayList<>(List.of("A", "B"));
+Iterator<String> it = list.iterator();
+
+list.add("C");  // Modify
+list.remove("A");  // Modify
+
+while (it.hasNext()) {
+    System.out.println(it.next());  // A, B (snapshot tại thời điểm tạo iterator)
+}
+
+System.out.println(list);  // [B, C] (trạng thái hiện tại)
+
+// ❌ Iterator.remove() không hỗ trợ
+Iterator<String> it2 = list.iterator();
+it2.next();
+it2.remove();  // UnsupportedOperationException
+```
+
+---
+
+**ConcurrentHashMap:**
+
+Thread-safe HashMap với hiệu suất cao, không block toàn bộ map.
+
+**Đặc điểm:**
+- **Thread-safe** mà không cần external synchronization
+- **Lock striping** - chỉ lock một phần map
+- **Không cho phép** null key hoặc null value
+- **Atomic operations**: `putIfAbsent()`, `remove()`, `replace()`
+- **Weakly consistent iterators** - không throw `ConcurrentModificationException`
+
+```java
+import java.util.concurrent.ConcurrentHashMap;
+
+ConcurrentHashMap<String, Integer> map = new ConcurrentHashMap<>();
+
+// ✅ Thread-safe put/get
+map.put("A", 1);
+map.put("B", 2);
+
+Integer value = map.get("A");  // 1
+
+// ✅ putIfAbsent - atomic
+Integer prev = map.putIfAbsent("C", 3);  // null (key chưa tồn tại)
+Integer prev2 = map.putIfAbsent("C", 4);  // 3 (key đã tồn tại, không update)
+
+// ✅ remove(key, value) - atomic
+boolean removed = map.remove("A", 1);  // true (xóa nếu key = "A" và value = 1)
+boolean notRemoved = map.remove("B", 99);  // false (value không khớp)
+
+// ✅ replace(key, oldValue, newValue) - atomic
+boolean replaced = map.replace("B", 2, 20);  // true
+boolean notReplaced = map.replace("B", 2, 30);  // false (oldValue không khớp)
+
+// ✅ replace(key, value) - atomic (không cần oldValue)
+Integer old = map.replace("B", 200);  // 20, map = {B=200, C=3}
+
+// ✅ computeIfAbsent
+map.computeIfAbsent("D", k -> k.length());  // D=1 (tính value từ key)
+
+// ✅ computeIfPresent
+map.computeIfPresent("D", (k, v) -> v * 2);  // D=2 (update value)
+
+// ✅ compute
+map.compute("E", (k, v) -> (v == null) ? 1 : v + 1);  // E=1
+
+// ✅ merge
+map.merge("E", 10, (oldVal, newVal) -> oldVal + newVal);  // E=11
+```
+
+**⚠️ Lưu ý:**
+
+```java
+// ❌ Không cho phép null key hoặc null value
+ConcurrentHashMap<String, Integer> map = new ConcurrentHashMap<>();
+map.put(null, 1);      // NullPointerException
+map.put("A", null);    // NullPointerException
+
+// ✅ HashMap cho phép null
+HashMap<String, Integer> hashMap = new HashMap<>();
+hashMap.put(null, 1);   // OK
+hashMap.put("A", null); // OK
+
+// ⚠️ Iterator là weakly consistent
+ConcurrentHashMap<String, Integer> map = new ConcurrentHashMap<>(Map.of("A", 1, "B", 2));
+Iterator<String> it = map.keySet().iterator();
+
+map.put("C", 3);  // Modify during iteration
+
+while (it.hasNext()) {
+    System.out.println(it.next());  // Có thể hoặc không thấy "C"
+}
+// Không throw ConcurrentModificationException
+
+// ⚠️ size() có thể không chính xác khi concurrent updates
+// Chỉ là estimate
+int size = map.size();  // Approximate
+```
+
+---
+
+**BlockingQueue:**
+
+Queue hỗ trợ blocking operations - chờ khi queue rỗng (take) hoặc đầy (put).
+
+**Implementations:**
+- `LinkedBlockingQueue` - unbounded/bounded FIFO queue
+- `ArrayBlockingQueue` - bounded FIFO queue (fixed size)
+- `PriorityBlockingQueue` - unbounded priority queue
+
+**Methods:**
+
+| Operation | Throws Exception | Returns Special | Blocks | Times Out |
+|-----------|-----------------|-----------------|---------|-----------|
+| Insert | `add(e)` | `offer(e)` | `put(e)` | `offer(e, time, unit)` |
+| Remove | `remove()` | `poll()` | `take()` | `poll(time, unit)` |
+| Examine | `element()` | `peek()` | N/A | N/A |
+
+```java
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ArrayBlockingQueue;
+
+// ✅ LinkedBlockingQueue - unbounded
+LinkedBlockingQueue<Integer> unbounded = new LinkedBlockingQueue<>();
+
+unbounded.put(1);   // Block nếu đầy (nhưng unbounded nên không bao giờ đầy)
+Integer value = unbounded.take();  // Block nếu rỗng
+
+// ✅ ArrayBlockingQueue - bounded (capacity cố định)
+ArrayBlockingQueue<Integer> bounded = new ArrayBlockingQueue<>(5);  // Max 5 elements
+
+bounded.put(1);  // OK
+bounded.put(2);  // OK
+// ... bounded.put(5);  // OK
+// bounded.put(6);  // BLOCK (queue đầy)
+
+// ✅ offer() với timeout
+boolean added = bounded.offer(6, 1, TimeUnit.SECONDS);  // Chờ 1 giây
+// false nếu vẫn đầy sau 1 giây
+
+// ✅ poll() với timeout
+Integer val = bounded.poll(1, TimeUnit.SECONDS);  // Chờ 1 giây nếu rỗng
+// null nếu vẫn rỗng sau 1 giây
+```
+
+**Producer-Consumer với BlockingQueue:**
+
+```java
+BlockingQueue<Integer> queue = new LinkedBlockingQueue<>(10);
+
+// Producer
+Runnable producer = () -> {
+    try {
+        for (int i = 0; i < 100; i++) {
+            queue.put(i);  // Block nếu queue đầy
+            System.out.println("Produced: " + i);
+        }
+    } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+    }
+};
+
+// Consumer
+Runnable consumer = () -> {
+    try {
+        while (true) {
+            Integer item = queue.take();  // Block nếu queue rỗng
+            System.out.println("Consumed: " + item);
+        }
+    } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+    }
+};
+
+new Thread(producer).start();
+new Thread(consumer).start();
+```
+
+---
+
+**ConcurrentLinkedQueue:**
+
+Thread-safe unbounded FIFO queue (non-blocking).
+
+```java
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+ConcurrentLinkedQueue<String> queue = new ConcurrentLinkedQueue<>();
+
+// ✅ Thread-safe operations
+queue.offer("A");   // Add
+queue.offer("B");
+
+String head = queue.peek();  // "A" (không remove)
+String removed = queue.poll();  // "A" (remove và return)
+
+// ✅ Không block - trả về null nếu rỗng
+String empty = queue.poll();  // null (queue rỗng)
+```
+
+---
+
+**⚠️ So sánh Concurrent Collections:**
+
+```java
+// CopyOnWriteArrayList vs Collections.synchronizedList
+List<String> syncList = Collections.synchronizedList(new ArrayList<>());
+CopyOnWriteArrayList<String> cowList = new CopyOnWriteArrayList<>();
+
+// syncList: Lock toàn bộ list khi read/write
+// cowList: Copy array khi write, không lock khi read
+
+// ❌ Collections.synchronizedList - iterator cần external sync
+synchronized(syncList) {
+    Iterator<String> it = syncList.iterator();
+    while (it.hasNext()) {
+        System.out.println(it.next());
+    }
+}
+
+// ✅ CopyOnWriteArrayList - iterator không cần sync
+Iterator<String> it = cowList.iterator();
+while (it.hasNext()) {
+    System.out.println(it.next());  // Thread-safe
+}
+
+// ConcurrentHashMap vs Collections.synchronizedMap
+Map<String, Integer> syncMap = Collections.synchronizedMap(new HashMap<>());
+ConcurrentHashMap<String, Integer> concMap = new ConcurrentHashMap<>();
+
+// syncMap: Lock toàn bộ map
+// concMap: Lock striping (chỉ lock một phần)
+
+// BlockingQueue vs ConcurrentLinkedQueue
+BlockingQueue<String> blocking = new LinkedBlockingQueue<>();
+ConcurrentLinkedQueue<String> nonBlocking = new ConcurrentLinkedQueue<>();
+
+blocking.take();     // BLOCK nếu rỗng
+nonBlocking.poll();  // Return null nếu rỗng (không block)
+```
 ---

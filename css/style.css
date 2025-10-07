@@ -35,14 +35,15 @@ body {
 .header {
     background: var(--background);
     border-bottom: 1px solid var(--border-color);
-    padding: 2rem 0;
+    padding: 1.25rem 0;
 }
 
 .site-title {
-    font-size: 2rem;
+    font-size: 1.75rem;
     font-weight: 700;
     color: var(--primary-color);
-    margin-bottom: 0.5rem;
+    margin: 0;
+    letter-spacing: -0.02em;
 }
 
 .site-description {
