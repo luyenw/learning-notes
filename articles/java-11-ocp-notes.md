@@ -1,3 +1,7 @@
+# Java 11 OCP Notes
+
+*"Tài liệu tổng hợp kiến thức chuẩn bị cho kỳ thi Oracle Certified Professional Java SE 11 Developer, bao gồm các chủ đề: Kiểu dữ liệu và biến, Lập trình hướng đối tượng, Cấu trúc điều khiển, Mảng và Collections, Xử lý ngoại lệ, Lập trình đa luồng (Concurrency) và các khái niệm nâng cao của Java."*
+
 ## 1. Java Data Types
 
 ### 1.1. Primitive Types

@@ -13,6 +13,27 @@
       "date": "2025-10-05",
       "excerpt": "Complete study notes for Java 11 OCP certification covering data types, OOP principles, control flow, with detailed examples and edge cases for exam preparation.",
       "tags": ["java", "ocp"]
+    },
+    {
+      "title": "suricata ids/ips - part 1: kiến thức nền tảng về mạng và bảo mật",
+      "filename": "suricata-ids-ips.md",
+      "date": "2025-10-14",
+      "excerpt": "Phần 1 cung cấp kiến thức nền tảng về mô hình OSI/TCP-IP, cấu trúc gói tin mạng, flow/session/reassembly, các giao thức ứng dụng phổ biến (HTTP, DNS, TLS, SMTP, SSH, FTP, DHCP), và các dạng tấn công mạng (DoS/DDoS, Brute-force, Scan, Injection, Exploit).",
+      "tags": ["security", "suricata", "network"]
+    },
+    {
+      "title": "suricata ids/ips - part 2: tổng quan về ids/ips",
+      "filename": "suricata-ids-ips-part2.md",
+      "date": "2025-10-14",
+      "excerpt": "Phần 2 giới thiệu tổng quan về hệ thống phát hiện và phòng chống xâm nhập mạng (IDS/IPS), phân loại các loại hệ thống, so sánh các công cụ phổ biến như Suricata, Snort, Zeek/Bro, và đánh giá ưu nhược điểm về hiệu năng, khả năng mở rộng, độ chính xác và tích hợp.",
+      "tags": ["security", "ids", "ips", "suricata"]
+    },
+    {
+      "title": "suricata ids/ips - part 3: kiến trúc lõi",
+      "filename": "suricata-ids-ips-part3.md",
+      "date": "2025-10-14",
+      "excerpt": "Phần 3 đi sâu vào kiến trúc bên trong của Suricata, bao gồm mô hình đa luồng (multi-threaded packet pipeline), các capture engines (AF-Packet, PF_RING, NFQUEUE, PCAP), Flow Manager, Stream engine, Detection engine, Output modules và Lua scripting subsystem.",
+      "tags": ["security", "suricata", "architecture"]
     }
   ]
 }
