@@ -34,6 +34,13 @@
       "date": "2025-10-14",
       "excerpt": "Phần 3 đi sâu vào kiến trúc bên trong của Suricata, bao gồm mô hình đa luồng (multi-threaded packet pipeline), các capture engines (AF-Packet, PF_RING, NFQUEUE, PCAP), Flow Manager, Stream engine, Detection engine, Output modules và Lua scripting subsystem.",
       "tags": ["security", "suricata"]
+    },
+    {
+      "title": "OCI Generative AI Professional Certification - Cheatsheet & Study Guide",
+      "filename": "oci-generative-ai-professional-cheatsheet.md",
+      "date": "2025-10-20",
+      "excerpt": "Tổng hợp kiến thức quan trọng để ôn thi OCI Generative AI Professional (1Z0-1127-25) bao gồm LLM fundamentals, OCI GenAI Service, RAG, Agents, cost optimization, security và 50+ câu hỏi thực hành.",
+      "tags": ["oracle", "oci", "generative-ai", "certification", "llm", "rag"]
     }
   ]
 }
