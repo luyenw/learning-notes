@@ -37,7 +37,7 @@
     },
     {
       "title": "OCI Generative AI Professional Certification - Cheatsheet & Study Guide",
-      "filename": "oci-generative-ai-professional-cheatsheet.md",
+      "filename": "oci-gen-ai.md",
       "date": "2025-10-20",
       "excerpt": "Tổng hợp kiến thức quan trọng để ôn thi OCI Generative AI Professional (1Z0-1127-25) bao gồm LLM fundamentals, OCI GenAI Service, RAG, Agents, cost optimization, security và 50+ câu hỏi thực hành.",
       "tags": ["oracle", "oci", "generative-ai", "certification", "llm", "rag"]
