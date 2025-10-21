@@ -1,10 +1,3 @@
----
-title: "OCI Generative AI Professional Certification - Cheatsheet & Study Guide"
-date: 2025-10-20
-tags: ["oracle", "oci", "generative-ai", "certification", "llm", "rag"]
-description: "Tổng hợp kiến thức quan trọng để ôn thi OCI Generative AI Professional (1Z0-1127-25)"
----
-
 # OCI Generative AI Professional - Study Guide
 
 > **Certification Code**: 1Z0-1127-25
@@ -1245,44 +1238,6 @@ Monthly Cost = Units × Hourly Rate × 744 hrs
 
 ---
 
-## 11. Study Strategy
-
-### Week 1: Fundamentals
-- [ ] LLM architectures (Encoder/Decoder/Both)
-- [ ] Prompting techniques (Zero-shot, Few-shot, CoT)
-- [ ] Decoding methods (Temperature, Top-k, Top-p)
-- [ ] Training methods (Fine-tuning, LoRA, T-Few)
-
-### Week 2: OCI Services
-- [ ] OCI Generative AI Service overview
-- [ ] Pre-trained models (Cohere, Llama)
-- [ ] Embedding models
-- [ ] Fine-tuning workflow
-- [ ] Dedicated AI Clusters
-
-### Week 3: RAG & Integration
-- [ ] RAG pipeline (Ingestion → Retrieval → Generation)
-- [ ] LangChain components
-- [ ] Oracle 23ai vector store
-- [ ] Vector indexes (HNSW, IVF)
-- [ ] Similarity metrics
-
-### Week 4: Agents & Advanced
-- [ ] OCI Generative AI Agents architecture
-- [ ] Knowledge base creation
-- [ ] Data sources (Object Storage, OpenSearch, DB)
-- [ ] Sessions, endpoints, traces
-- [ ] Content moderation
-
-### Week 5: Security & Practice
-- [ ] IAM policies for agents
-- [ ] Data privacy & encryption
-- [ ] Network security (private endpoints)
-- [ ] Cost optimization
-- [ ] Practice questions (50+ questions)
-
----
-
 ## 12. Additional Resources
 
 ### Official Documentation
@@ -1294,11 +1249,6 @@ Monthly Cost = Units × Hourly Rate × 744 hrs
 - Oracle Learning Library
 - Oracle Cloud Free Tier (hands-on practice)
 - Quizlet flashcards (search "Oracle Generative AI Professional")
-
-### Key GitHub Repositories
-- [Oracle Generative AI Examples](https://github.com/oracle-samples/generative-ai)
-- [LangChain Documentation](https://python.langchain.com/)
-
 ---
 
 ## Final Checklist
