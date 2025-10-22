@@ -15,7 +15,6 @@
 4. [OCI Generative AI Agents](#oci-generative-ai-agents)
 5. [Cost Optimization & Sizing](#cost-optimization)
 6. [Security & Governance](#security-and-governance)
-7. [Practice Questions](#practice-questions)
 
 ---
 
@@ -778,329 +777,7 @@ Allow dynamic-group genai-agents to use generative-ai-family in tenancy
 
 ---
 
-## 7. Practice Questions
-
-### Set 1: Fundamentals (10 Questions)
-
-**Q1**. What does "large" in LLM primarily refer to?
-a) Vocabulary size
-b) Training dataset size
-c) Number of parameters ✅
-d) Number of GPUs used
-
-**Q2**. Which architecture is best suited for semantic search?
-a) Decoder
-b) Encoder ✅
-c) Encoder-Decoder
-d) Random Forest
-
-**Q3**. Which prompting technique encourages step-by-step reasoning?
-a) Chain-of-Thought prompting ✅
-b) Zero-shot prompting
-c) Greedy prompting
-d) LoRA prompting
-
-**Q4**. What does temperature control in decoding?
-a) The speed of model training
-b) The size of the vocabulary
-c) The randomness of token selection ✅
-d) The number of parameters updated
-
-**Q5**. Which training method adds new parameters without changing original ones?
-a) Fine-tuning
-b) LoRA
-c) Soft Prompting ✅
-d) Continual Pretraining
-
-**Q6**. Which decoding method always picks the most likely token?
-a) Random Sampling
-b) Beam Search
-c) Greedy Decoding ✅
-d) Nucleus Sampling
-
-**Q7**. Which fine-tuning method updates only ~0.01% of weights?
-a) Vanilla fine-tuning
-b) T-Few ✅
-c) LoRA
-d) Zero-shot prompting
-
-**Q8**. Which evaluation metric is commonly used for summarization?
-a) BLEU
-b) Accuracy
-c) ROUGE ✅
-d) Perplexity
-
-**Q9**. What is a known risk of deploying LLMs?
-a) Faster processing
-b) Prompt Injection ✅
-c) Higher accuracy
-d) Lower memory usage
-
-**Q10**. Which model is an example of a decoder architecture?
-a) BERT
-b) GPT-4 ✅
-c) ResNet
-d) Word2Vec
-
----
-
-### Set 2: OCI Generative AI Service (10 Questions)
-
-**Q11**. Which OCI chat model supports up to 128k tokens per input?
-a) Command-R (16k)
-b) Command-R-Plus ✅
-c) Llama 3.1 (70B)
-d) Cohere embed-english
-
-**Q12**. What is the main use case for embedding models?
-a) Conversational chat
-b) Text-to-image
-c) Semantic search ✅
-d) Translation only
-
-**Q13**. Which parameter controls the randomness of the output?
-a) Frequency penalty
-b) Temperature ✅
-c) Top-k
-d) Context length
-
-**Q14**. What is a major advantage of RAG?
-a) Eliminates the cost of GPUs
-b) Provides grounded answers with enterprise data ✅
-c) Removes the need for tokenization
-d) Always reduces latency
-
-**Q15**. Which parameter reduces repeated phrases based on count?
-a) Temperature
-b) Top-p
-c) Frequency penalty ✅
-d) Presence penalty
-
-**Q16**. What is the minimum hosting commitment for OCI clusters?
-a) 1 hour
-b) 10 hours
-c) 744 hours ✅
-d) 96 hours
-
-**Q17**. Which cluster type is used for Llama models?
-a) Large Cohere Dedicated
-b) Small Cohere Dedicated
-c) Large Meta Dedicated ✅
-d) Embedding Cohere Dedicated
-
-**Q18**. Which OCI service manages encryption keys for fine-tuned models?
-a) OCI IAM
-b) OCI Object Storage
-c) OCI Key Management (Vault) ✅
-d) OCI Data Guard
-
-**Q19**. What is the maximum file size for Object Storage ingestion?
-a) 10 MB
-b) 50 MB
-c) 100 MB ✅
-d) Unlimited
-
-**Q20**. Which statement is true about OCI GenAI data privacy?
-a) Data may be used for training
-b) Customer data is never used to train base models ✅
-c) Data is shared across tenants
-d) Data must leave tenant boundary
-
----
-
-### Set 3: RAG & LangChain (10 Questions)
-
-**Q21**. Which LangChain component preserves conversation context?
-a) Prompt Template
-b) Memory ✅
-c) Chain
-d) Vector Store
-
-**Q22**. Which template is designed for conversational inputs?
-a) Prompt Template
-b) ChainTemplate
-c) ChatPromptTemplate ✅
-d) DialogueTemplate
-
-**Q23**. Which Oracle feature converts natural language to SQL?
-a) Oracle Cloud Guard
-b) Oracle Data Guard
-c) Oracle SELECT AI ✅
-d) Oracle AutoML
-
-**Q24**. Which similarity metric considers both magnitude and angle?
-a) Cosine Similarity
-b) Dot Product ✅
-c) Euclidean Distance
-d) Jaccard Index
-
-**Q25**. Why is chunk overlap used in text splitting?
-a) To reduce cost
-b) To maintain semantic continuity ✅
-c) To increase retrieval speed
-d) To avoid indexing
-
-**Q26**. What type of index is HNSW?
-a) Partition-based index
-b) Graph-based neighbor index ✅
-c) Flat index
-d) Semantic index
-
-**Q27**. What is the role of embeddings in RAG?
-a) Tokenize text
-b) Convert text to vectors for similarity search ✅
-c) Generate SQL queries
-d) Reduce context window
-
-**Q28**. Which LangChain class chains retrieval + LLM?
-a) ChatPromptTemplate
-b) RetrievalQA ✅
-c) MemoryChain
-d) OracleVS
-
-**Q29**. Which Oracle 23ai datatype stores embeddings?
-a) BLOB
-b) JSON
-c) VECTOR ✅
-d) VARCHAR
-
-**Q30**. What must align between queries and stored vectors?
-a) File formats
-b) Table schemas
-c) Embedding models ✅
-d) Indexing methods
-
----
-
-### Set 4: OCI Generative AI Agents (10 Questions)
-
-**Q31**. What is a Knowledge Base in OCI GenAI Agents?
-a) Collection of rules
-b) Vector-indexed datastore ✅
-c) Pre-trained knowledge
-d) Conversation log
-
-**Q32**. Which feature ensures responses are traceable?
-a) Trace
-b) Persona
-c) Groundedness ✅
-d) Content Moderation
-
-**Q33**. What maintains continuity in conversations?
-a) Prompt
-b) Tools
-c) Memory ✅
-d) Citation
-
-**Q34**. Which OCI service allows PDF/TXT ingestion?
-a) OCI IAM
-b) OCI Object Storage ✅
-c) OCI Vault
-d) OCI Logging
-
-**Q35**. Hybrid search combines:
-a) Semantic + Lexical search ✅
-b) Vector + Image search
-c) RAG + Prompt engineering
-d) SQL + Graph search
-
-**Q36**. What defines connection details for data retrieval?
-a) Knowledge Base
-b) Data Store
-c) Data Source ✅
-d) Embedding Model
-
-**Q37**. What is the default session timeout?
-a) 300 seconds
-b) 1 hour (3,600 seconds) ✅
-c) 24 hours
-d) 7 days
-
-**Q38**. Which feature tracks conversation history?
-a) Trace ✅
-b) Session
-c) Content Moderation
-d) Endpoint
-
-**Q39**. Which search method is meaning-based?
-a) Lexical
-b) Semantic ✅
-c) Hybrid
-d) Full-text
-
-**Q40**. What can Agents do that chatbots cannot?
-a) Maintain context
-b) Generate text
-c) Call external APIs/tools ✅
-d) Translate languages
-
----
-
-### Set 5: Advanced & Scenario-Based (10 Questions)
-
-**Q41**. You deploy a model in a healthcare environment requiring no internet exposure. Which deployment option is best?
-a) Public endpoint with security lists
-b) Private endpoint within VCN ✅
-c) Base model only
-d) Object Storage with signed URLs
-
-**Q42**. Files in Object Storage contain multilingual text and diagrams. What will the Agent ingest?
-a) All content including diagrams
-b) Text only; diagrams ignored ✅
-c) Only UTF-8 labeled text
-d) Only English text
-
-**Q43**. Which task requires embedding models, not generative LLMs?
-a) Summarizing text
-b) Sentiment classification
-c) Similarity search over knowledge bases ✅
-d) Answering questions
-
-**Q44**. Which mitigation best reduces hallucination?
-a) Increase temperature
-b) Restrict to retrieval-augmented context ✅
-c) Disable embeddings
-d) Use embedding-only responses
-
-**Q45**. To allow an Agent to access Object Storage, which IAM principle is required?
-a) OBJECT_WRITE and OBJECT_DELETE
-b) OBJECT_READ access to Agent's dynamic group ✅
-c) Tenancy-level ADMIN
-d) No IAM permissions needed
-
-**Q46**. Your fine-tuned sentiment model misclassifies slang. What is the best mitigation?
-a) Increase beam size
-b) Collect new training data with slang and retrain ✅
-c) Adjust Object Storage policies
-d) Switch to embedding model
-
-**Q47**. Which framework does Oracle reference for AI governance?
-a) COBIT 2019
-b) NIST AI Risk Management Framework ✅
-c) ITIL v4
-d) ISO 22301
-
-**Q48**. If you update a PDF in Object Storage linked to a knowledge base, what must you do?
-a) Nothing; syncs automatically
-b) Re-trigger ingestion job ✅
-c) Delete and recreate knowledge base
-d) Update IAM policy
-
-**Q49**. Which fine-tuning method is most cost-efficient?
-a) Vanilla fine-tuning
-b) T-Few ✅
-c) Continual pretraining
-d) Training from scratch
-
-**Q50**. When is RAG preferred over fine-tuning?
-a) Static domain knowledge
-b) Dynamic, frequently updated data ✅
-c) Maximum customization needed
-d) No external data available
-
----
-
-## 8. Key Formulas & Numbers
+## 7. Key Formulas & Numbers
 
 ### Cost Calculations
 
@@ -1136,78 +813,7 @@ Monthly Cost = Units × Hourly Rate × 744 hrs
 
 ---
 
-## 9. Exam Tips
-
-### 1. Focus Areas by Weight
-
-**High Priority** (40-50% of exam):
-- OCI Generative AI Service architecture
-- RAG implementation
-- Fine-tuning vs other approaches
-- Agent capabilities
-
-**Medium Priority** (30-40%):
-- LLM fundamentals
-- Prompt engineering
-- Cost optimization
-- Security & IAM
-
-**Lower Priority** (10-20%):
-- Specific code syntax
-- Exact pricing numbers
-- Detailed API calls
-
-### 2. Common Traps
-
-**Trap**: Confusing **Frequency Penalty** vs **Presence Penalty**
-- **Frequency**: Proportional to occurrence count
-- **Presence**: Binary (appeared or not)
-
-**Trap**: Confusing **Encoder** vs **Decoder**
-- **Encoder**: Embeddings, search
-- **Decoder**: Text generation
-
-**Trap**: Assuming **Agents auto-sync** with Object Storage
-- Must **re-trigger ingestion** after updates
-
-**Trap**: Thinking **customer data** is used for training
-- **Never used** to train Oracle's base models
-
-### 3. Calculation Questions
-
-**Be Ready For**:
-- Fine-tuning cost given units, rate, hours
-- Hosting cost for 744 hrs/month
-- Choosing cluster type based on model
-- GPU units based on parameter count
-
-### 4. Scenario-Based Questions
-
-**Common Scenarios**:
-- Choosing between RAG vs fine-tuning
-- Private endpoint for compliance
-- Reducing hallucination
-- Cost optimization
-- IAM for Agent access
-
-### 5. Keywords to Watch
-
-| Keyword | Likely Answer |
-|---------|---------------|
-| "No internet exposure" | Private endpoint |
-| "Outdated information" | RAG |
-| "Cost-efficient tuning" | T-Few or LoRA |
-| "128k tokens" | Command-R-Plus |
-| "Traceable to sources" | Groundedness, Citations |
-| "Step-by-step reasoning" | Chain-of-Thought |
-| "~0.01% weights" | T-Few |
-| "744 hours" | Hosting commitment |
-| "Llama models" | Large Meta Dedicated |
-| "Encryption keys" | OCI Key Management |
-
----
-
-## 10. Quick Reference Tables
+## 8. Quick Reference Tables
 
 ### Model Selection Guide
 
@@ -1238,20 +844,15 @@ Monthly Cost = Units × Hourly Rate × 744 hrs
 
 ---
 
-## 12. Additional Resources
+## 9. Additional Resources
 
-### Official Documentation
-- [OCI Generative AI Documentation](https://docs.oracle.com/en-us/iaas/Content/generative-ai/home.htm)
-- [OCI Generative AI Agents](https://docs.oracle.com/en-us/iaas/Content/generative-ai-agents/home.htm)
-- [Oracle Database 23ai Vector Search](https://docs.oracle.com/en/database/oracle/oracle-database/23/vecse/)
+### Exam Dumps & Cheat Sheets
+- [1Z0-1127-24 OCI Generative AI Professional - Question Dumps](https://www.scribd.com/document/742863344/1Z0-1127-24-OCI-Generative-AI-Professional)
+- [1Z0-1127-25 Oracle Cloud Infrastructure 2025 Generative AI Professional - Cheat Sheet](https://www.linkedin.com/pulse/cheersheet-1z0-1127-25-oracle-cloud-infrastructure-2025-david-edwards-xdqde)
 
-### Practice Platforms
-- Oracle Learning Library
-- Oracle Cloud Free Tier (hands-on practice)
-- Quizlet flashcards (search "Oracle Generative AI Professional")
 ---
 
-## Final Checklist
+## 10. Final Checklist
 
 Before the exam, ensure you can:
 
@@ -1274,10 +875,17 @@ Before the exam, ensure you can:
 - [ ] Differentiate **Frequency vs Presence Penalty**
 - [ ] Select **cluster type** for Llama models
 - [ ] Use **OCI Key Management** for encryption
-- [ ] Apply **NIST AI RMF** governance framework
 
 ---
 
 **Good luck with your OCI Generative AI Professional certification!**
 
 *Last updated: 2025-10-20*
+
+---
+
+## 11. Certification Badge
+
+<!-- Certification badge will be displayed here once obtained -->
+
+![OCI Generative AI Professional Certification](path/to/cert-image.png)
