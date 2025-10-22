@@ -3,7 +3,7 @@
 > **Certification Code**: 1Z0-1127-25
 > **Target Audience**: Cloud Architects, AI/ML Engineers, Developers
 > **Duration**: 90 minutes
-> **Format**: Multiple Choice
+> **Format**: Multiple Choice (Thật ra là chọn 1 đáp án)
 
 ---
 
@@ -13,8 +13,6 @@
 2. [OCI Generative AI Service](#oci-generative-ai-service)
 3. [Retrieval-Augmented Generation (RAG)](#rag-and-oracle-vector-search)
 4. [OCI Generative AI Agents](#oci-generative-ai-agents)
-5. [Cost Optimization & Sizing](#cost-optimization)
-6. [Security & Governance](#security-and-governance)
 
 ---
 
@@ -636,162 +634,48 @@ END;
 
 **Key Difference**: Agents can **call external APIs/tools** during reasoning.
 
----
+### 4.14 Cost Optimization & Security Considerations
 
-## 5. Cost Optimization
+#### Cost Optimization
 
-### 5.1 Model Selection Strategy
+**Model Selection**:
+- Use **smallest model** that meets requirements
+- Simple Q&A → Command-R | Complex reasoning → Command-R-Plus
 
-| Task Complexity | Recommended Model | Reason |
-|----------------|-------------------|--------|
-| Simple Q&A | Smaller model (Command-R) | Lower cost |
-| Complex reasoning | Larger model (Command-R-Plus) | Better accuracy |
-| Code generation | Specialized code model | Domain expertise |
-| Translation | Encoder-decoder | Architecture match |
-
-**Principle**: Use **smallest model** that meets requirements.
-
-### 5.2 Fine-tuning Cost Calculation
-
-```
-Cost = Units × Hourly Rate × Hours
-```
-
-**Factors**:
-- Model size (more parameters = more units)
-- Dataset size (more tokens = longer training)
-- Method (LoRA/T-Few = cheaper)
-
-**Optimization**:
+**Fine-tuning Cost**: `Cost = Units × Hourly Rate × Hours`
 - Use **T-Few or LoRA** (parameter-efficient)
 - Run **pilot jobs** to estimate
-- Use **smaller base model** if possible
 
-### 5.3 Hosting Cost Calculation
-
-```
-Monthly Cost = Units × Hourly Rate × 744 hrs
-```
-
-**Commitment**: Minimum **744 hours/month** (24×7)
-
-**Optimization**:
+**Hosting Cost**: `Monthly Cost = Units × Hourly Rate × 744 hrs`
+- Minimum **744 hours/month** (24×7 commitment)
 - Use **on-demand inference** for low traffic
-- Use **dedicated hosting** for high traffic
-- Deploy **regionally** to reduce latency
 
-### 5.4 RAG vs Fine-tuning Cost
+**RAG vs Fine-tuning**: Use **RAG first**, fine-tune only if necessary
 
-| Aspect | RAG | Fine-tuning |
-|--------|-----|-------------|
-| **Initial Cost** | Low | High |
-| **Ongoing Cost** | Storage + queries | Hosting |
-| **Update Cost** | Re-index documents | Re-train model |
-| **Time to Deploy** | Hours | Days |
-| **Best For** | Dynamic data | Static domain |
+#### Security & Governance
 
-**Rule of Thumb**: Use **RAG first**, fine-tune only if necessary.
-
----
-
-## 6. Security and Governance
-
-### 6.1 IAM (Identity and Access Management)
-
-**Access Control**:
-- **Dynamic Groups**: Allow agents to access resources
-- **Policies**: Grant specific permissions
-- **Principle of Least Privilege**: Minimum necessary access
-
-**Example Policy**:
+**IAM**: Dynamic Groups + Policies (Principle of Least Privilege)
 ```
 Allow dynamic-group genai-agents to read objects in compartment knowledge-base
 Allow dynamic-group genai-agents to use generative-ai-family in tenancy
 ```
 
-### 6.2 Data Privacy
+**Data Privacy**:
+- Customer data **never used** to train Oracle's base models
+- Encrypted at rest and in transit with **OCI Key Management (Vault)**
+- **Isolated** within your tenancy
 
-**Customer Data**:
-- **Never used** to train Oracle's base models
-- **Stored within** your tenancy
-- **Encrypted** at rest and in transit
+**Network Security**: **Private Endpoints** within VCN for compliance (healthcare, finance)
 
-**Fine-tuned Models**:
-- Weights stored in **your Object Storage**
-- Encrypted with **OCI Key Management (Vault)**
-- **Isolated** from other tenants
+**Content Moderation**: Filter harmful content (hate speech, violence, sexual content, self-harm)
 
-### 6.3 OCI Key Management (Vault)
-
-**Purpose**: Securely manage encryption keys
-
-**Use Cases**:
-- Encrypt fine-tuned model weights
-- Encrypt data in Object Storage
-- Encrypt vector database
-
-**Key Types**:
-- **Master Keys**: Managed by OCI
-- **Customer-Managed Keys**: You control rotation
-
-### 6.4 Network Security
-
-**Private Endpoints**:
-- Deploy models **within VCN**
-- **No public internet** exposure
-- Access via **private IPs only**
-
-**Use Case**: Compliance requirements (healthcare, finance)
-
-### 6.5 Content Moderation
-
-**Applies To**:
-- User inputs (prevent prompt injection)
-- Model outputs (filter harmful content)
-
-**Categories**:
-- Hate speech
-- Violence
-- Sexual content
-- Self-harm
-
-### 6.6 Governance Framework
-
-**Oracle References**: **NIST AI Risk Management Framework (AI RMF)**
-
-**Best Practices**:
-- Document model decisions
-- Monitor for bias
-- Regular audits
-- Incident response plan
-
-### 6.7 Compliance
-
-**Certifications**:
-- ISO 27001
-- SOC 1/2/3
-- GDPR compliant
-- HIPAA eligible (with BAA)
-
-**Data Residency**: Choose region for data storage
+**Compliance**: ISO 27001, SOC 1/2/3, GDPR, HIPAA eligible | **NIST AI RMF** governance framework
 
 ---
 
-## 7. Key Formulas & Numbers
+## 5. Quick Reference
 
-### Cost Calculations
-
-**Fine-tuning Cost**:
-```
-Cost = Units × Hourly Rate × Hours
-```
-
-**Hosting Cost**:
-```
-Monthly Cost = Units × Hourly Rate × 744 hrs
-```
-
-### Important Limits
+### Important Limits & Numbers
 
 | Resource | Limit |
 |----------|-------|
@@ -802,39 +686,23 @@ Monthly Cost = Units × Hourly Rate × 744 hrs
 | **Files per data source** | 1,000 |
 | **Default session timeout** | 3,600s (1 hour) |
 | **Hosting commitment** | 744 hrs/month |
+| **GPU sizing (≤13B params)** | 4-8 units |
+| **GPU sizing (30-70B params)** | 8-16+ units |
 
-### GPU Sizing
+### Model & Approach Selection
 
-| Model Size | Units |
-|------------|-------|
-| ≤13B params | 4-8 |
-| 30-70B params | 8-16+ |
-| 100B+ params | 32+ |
-
----
-
-## 8. Quick Reference Tables
-
-### Model Selection Guide
-
-| Use Case | Recommended Model |
-|----------|-------------------|
+| Use Case | Recommended Model/Approach |
+|----------|---------------------------|
 | Short conversations | Command-R (16k) |
 | Long documents | Command-R-Plus (128k) |
 | Semantic search | Cohere embed models |
-| Code generation | Specialized code model |
 | Multilingual | embed-multilingual |
+| Quick experiments | Prompting |
+| Dynamic data, citations | RAG |
+| Domain-specific, static | Fine-tuning |
+| Training from scratch | Never (too expensive) |
 
-### When to Use What
-
-| Approach | When to Use |
-|----------|-------------|
-| **Prompting** | Quick experiments, no training |
-| **RAG** | Dynamic data, citations needed |
-| **Fine-tuning** | Domain-specific, static knowledge |
-| **From Scratch** | Never (too expensive) |
-
-### Data Source Comparison
+### Data Sources
 
 | Source | Managed | File Types | Pre-processing |
 |--------|---------|------------|----------------|
@@ -844,48 +712,25 @@ Monthly Cost = Units × Hourly Rate × 744 hrs
 
 ---
 
-## 9. Additional Resources
+## 6. Resources & Certification
 
-### Exam Dumps & Cheat Sheets
-- [1Z0-1127-24 OCI Generative AI Professional - Question Dumps](https://www.scribd.com/document/742863344/1Z0-1127-24-OCI-Generative-AI-Professional)
-- [1Z0-1127-25 Oracle Cloud Infrastructure 2025 Generative AI Professional - Cheat Sheet](https://www.linkedin.com/pulse/cheersheet-1z0-1127-25-oracle-cloud-infrastructure-2025-david-edwards-xdqde)
+### Exam Resources
+- [1Z0-1127-24 Question Dumps](https://www.scribd.com/document/742863344/1Z0-1127-24-OCI-Generative-AI-Professional)
+- [1Z0-1127-25 Cheat Sheet](https://www.linkedin.com/pulse/cheersheet-1z0-1127-25-oracle-cloud-infrastructure-2025-david-edwards-xdqde)
 
----
+### Key Exam Topics
+- Encoder vs Decoder architectures | Prompting techniques (Zero-shot, Few-shot, Chain-of-Thought)
+- Cost calculations (Fine-tuning & Hosting) | T-Few fine-tuning method
+- RAG pipeline phases | HNSW vs IVF indexes | Cosine vs Dot Product similarity
+- Agent vs Chatbot differences | Hybrid search (Lexical + Semantic)
+- Groundedness & hallucination mitigation | IAM policies for Agents
+- Private endpoints for compliance | Frequency vs Presence Penalty
+- Cluster types (Large Meta Dedicated for Llama) | OCI Key Management
 
-## 10. Final Checklist
-
-Before the exam, ensure you can:
-
-- [ ] Explain **Encoder vs Decoder** architectures
-- [ ] List **prompting techniques** and when to use each
-- [ ] Calculate **fine-tuning and hosting costs**
-- [ ] Describe **RAG pipeline** phases
-- [ ] Compare **HNSW vs IVF** indexes
-- [ ] Explain **Cosine vs Dot Product** similarity
-- [ ] List **OCI Generative AI chat models** and context limits
-- [ ] Describe **T-Few** fine-tuning method
-- [ ] Explain **Agent vs Chatbot** differences
-- [ ] List **supported data sources** for Agents
-- [ ] Describe **hybrid search** (Lexical + Semantic)
-- [ ] Explain **Groundedness** and how to ensure it
-- [ ] Configure **IAM policies** for Agent access
-- [ ] Choose **private endpoint** for compliance
-- [ ] Reduce **hallucination** using RAG
-- [ ] Update **knowledge base** after file changes
-- [ ] Differentiate **Frequency vs Presence Penalty**
-- [ ] Select **cluster type** for Llama models
-- [ ] Use **OCI Key Management** for encryption
-
----
-
-**Good luck with your OCI Generative AI Professional certification!**
-
-*Last updated: 2025-10-20*
-
----
-
-## 11. Certification Badge
-
-<!-- Certification badge will be displayed here once obtained -->
-
+### Certification Badge
+<!-- Badge will be displayed here once obtained -->
 ![OCI Generative AI Professional Certification](path/to/cert-image.png)
+
+---
+
+*Last updated: 2025-10-22*

@@ -12,7 +12,7 @@
       "filename": "java-11-ocp-notes.md",
       "date": "2025-10-05",
       "excerpt": "Complete study notes for Java 11 OCP certification covering data types, OOP principles, control flow, with detailed examples and edge cases for exam preparation.",
-      "tags": ["java", "ocp"]
+      "tags": ["java", "ocp", "certification"]
     },
     {
       "title": "suricata - part 1: kiến thức nền tảng về mạng và bảo mật",
@@ -40,7 +40,7 @@
       "filename": "oci-gen-ai.md",
       "date": "2025-10-20",
       "excerpt": "Tổng hợp kiến thức quan trọng để ôn thi OCI Generative AI Professional (1Z0-1127-25) bao gồm LLM fundamentals, OCI GenAI Service, RAG, Agents, cost optimization, security và 50+ câu hỏi thực hành.",
-      "tags": ["oracle", "oci", "generative-ai", "certification", "llm", "rag"]
+      "tags": ["oracle", "certification", "generative-ai"]
     }
   ]
 }

@@ -12,8 +12,6 @@ document.addEventListener('DOMContentLoaded', function() {
 async function initHomepage() {
     try {
         await loadArticles();
-        extractTags();
-        displayTags();
         displayArticlesByYear(articles);
     } catch (error) {
         console.error('Error initializing homepage:', error);
@@ -142,6 +140,7 @@ async function loadArticle() {
 
         const titleHeader = document.getElementById('articleTitleHeader');
         const metaContainer = document.getElementById('articleMeta');
+        const tagsContainer = document.getElementById('articleTags');
 
         titleHeader.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 1rem;">
@@ -150,6 +149,15 @@ async function loadArticle() {
             </div>
         `;
         metaContainer.innerHTML = '';
+
+        // Display tags
+        if (article.tags && article.tags.length > 0) {
+            tagsContainer.innerHTML = `
+                <div class="tags-list">
+                    ${article.tags.map(tag => `<span class="tag-badge">${escapeHtml(tag)}</span>`).join('')}
+                </div>
+            `;
+        }
 
         const response = await fetch(`articles/${articleFilename}`);
         if (!response.ok) {
@@ -165,9 +173,127 @@ async function loadArticle() {
             hljs.highlightAll();
         }
 
+        // Display related articles
+        displayRelatedArticles(article);
+
     } catch (error) {
         console.error('Error loading article:', error);
         displayArticleError('Failed to load article. Please try again later.');
+    }
+}
+
+// TF-IDF similarity calculation
+function calculateTFIDF(articles) {
+    const documents = articles.map(a => ({
+        id: a.filename,
+        text: `${a.title} ${a.tags.join(' ')}`.toLowerCase()
+    }));
+
+    const vocabulary = new Set();
+    const termFrequency = [];
+
+    documents.forEach(doc => {
+        const words = doc.text.split(/\s+/);
+        const tf = {};
+        words.forEach(word => {
+            vocabulary.add(word);
+            tf[word] = (tf[word] || 0) + 1;
+        });
+        termFrequency.push({ id: doc.id, tf, wordCount: words.length });
+    });
+
+    const documentFrequency = {};
+    vocabulary.forEach(word => {
+        documentFrequency[word] = termFrequency.filter(doc => doc.tf[word]).length;
+    });
+
+    const tfidf = termFrequency.map(doc => {
+        const vector = {};
+        Object.keys(doc.tf).forEach(word => {
+            const tf = doc.tf[word] / doc.wordCount;
+            const idf = Math.log(documents.length / (documentFrequency[word] || 1));
+            vector[word] = tf * idf;
+        });
+        return { id: doc.id, vector };
+    });
+
+    return tfidf;
+}
+
+function cosineSimilarity(vec1, vec2) {
+    const words = new Set([...Object.keys(vec1), ...Object.keys(vec2)]);
+    let dotProduct = 0;
+    let mag1 = 0;
+    let mag2 = 0;
+
+    words.forEach(word => {
+        const v1 = vec1[word] || 0;
+        const v2 = vec2[word] || 0;
+        dotProduct += v1 * v2;
+        mag1 += v1 * v1;
+        mag2 += v2 * v2;
+    });
+
+    if (mag1 === 0 || mag2 === 0) return 0;
+    return dotProduct / (Math.sqrt(mag1) * Math.sqrt(mag2));
+}
+
+function displayRelatedArticles(currentArticle) {
+    const relatedContainer = document.getElementById('relatedArticles');
+    if (!relatedContainer) return;
+
+    // Filter articles with common tags
+    const articlesWithCommonTags = articles.filter(a =>
+        a.filename !== currentArticle.filename &&
+        a.tags && currentArticle.tags &&
+        a.tags.some(tag => currentArticle.tags.includes(tag))
+    );
+
+    if (articlesWithCommonTags.length === 0) {
+        relatedContainer.innerHTML = '';
+        return;
+    }
+
+    // Calculate TF-IDF for similarity
+    const allArticles = [currentArticle, ...articlesWithCommonTags];
+    const tfidfVectors = calculateTFIDF(allArticles);
+
+    const currentVector = tfidfVectors.find(v => v.id === currentArticle.filename).vector;
+
+    const similarities = articlesWithCommonTags.map(article => {
+        const articleVector = tfidfVectors.find(v => v.id === article.filename).vector;
+        return {
+            article,
+            similarity: cosineSimilarity(currentVector, articleVector)
+        };
+    });
+
+    // Sort by similarity then by date
+    similarities.sort((a, b) => {
+        if (Math.abs(a.similarity - b.similarity) < 0.01) {
+            return new Date(b.article.date) - new Date(a.article.date);
+        }
+        return b.similarity - a.similarity;
+    });
+
+    // Take top 5
+    const topRelated = similarities.slice(0, 5);
+
+    if (topRelated.length > 0) {
+        relatedContainer.innerHTML = `
+            <h2 class="related-title">Related Articles</h2>
+            <div class="related-list">
+                ${topRelated.map(({ article }) => `
+                    <a href="article.html?article=${encodeURIComponent(article.filename)}" class="related-item">
+                        <h3 class="related-article-title">${escapeHtml(article.title)}</h3>
+                        <div class="related-meta">
+                            <span class="related-date">${formatDateShort(article.date)}</span>
+                            ${article.tags ? `<span class="related-tags">${article.tags.slice(0, 3).map(t => `#${escapeHtml(t)}`).join(' ')}</span>` : ''}
+                        </div>
+                    </a>
+                `).join('')}
+            </div>
+        `;
     }
 }
 
