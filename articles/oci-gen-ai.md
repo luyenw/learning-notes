@@ -728,8 +728,8 @@ Allow dynamic-group genai-agents to use generative-ai-family in tenancy
 - Cluster types (Large Meta Dedicated for Llama) | OCI Key Management
 
 ### Certification Badge
-<!-- Badge will be displayed here once obtained -->
-![OCI Generative AI Professional Certification](path/to/cert-image.png)
+
+![OCI Generative AI Professional Certification](./eCertificate.png)
 
 ---
 
