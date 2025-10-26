@@ -729,7 +729,7 @@ Allow dynamic-group genai-agents to use generative-ai-family in tenancy
 
 ### Certification Badge
 
-![OCI Generative AI Professional Certification](../images/eCertificate.png)
+![OCI Generative AI Professional Certification](/learning-notes/images/eCertificate.png)
 
 ---
 
